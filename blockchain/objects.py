@@ -1,5 +1,6 @@
 import json
 
+from calendar import timegm
 from typing import Optional
 from datetime import datetime
 from hashlib import sha256
@@ -31,10 +32,14 @@ class Block:
         return self.height == 0
 
     @property
+    def utctime(self) -> int:
+        return timegm(self.time.utctimetuple())
+
+    @property
     def dict(self) -> dict:
         data = {
             'hash': self.block_hash,
-            'time': int(self.time.timestamp()),
+            'time': int(self.utctime),
             'signature': self.signature,
             'chain_id': self.chain_id,
             'height': self.height,
@@ -67,7 +72,7 @@ class Block:
     def is_valid(self) -> bool:
         key = Key(self.chain_id)
         return (self.height == 0 or (self.prev_hash is not None and len(self.prev_hash) > 0)) and \
-            b58encode(sha256(self.data_for_hashing).digest()).decode('ascii') == self.block_hash and \
+            b58encode(sha256(self.data_for_hashing).digest()).decode('utf8') == self.block_hash and \
             key.verify(self.signature, self.data_for_hashing)
 
     def __str__(self):
@@ -154,8 +159,8 @@ class Blockchain:
         block.height = self.height
         if block.height > 0:
             block.prev_hash = self.database.get_block(self.id, block.height - 1).block_hash
-        block.block_hash = b58encode(sha256(block.data_for_hashing).digest()).decode('ascii')
-        block.signature = b58encode(self.key.sign(block.data_for_hashing)).decode('ascii')
+        block.block_hash = b58encode(sha256(block.data_for_hashing).digest()).decode('utf8')
+        block.signature = b58encode(self.key.sign(block.data_for_hashing)).decode('utf8')
         return block
 
     def save_block(self, block: Block) -> bool:

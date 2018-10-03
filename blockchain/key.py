@@ -12,19 +12,22 @@ class Key:
     def __init__(self, public_key: str = None, private_key: str = None):
         self.__public_key = None
         self.__private_key = None
-        if public_key is not None:
-            self.__public_key = VerifyingKey.from_string(
-                b58decode(public_key)[1:],
-                curve=NIST256p
-            )
+
         if private_key is not None:
             self.__private_key = SigningKey.from_string(
                 b58decode(private_key),
                 curve=NIST256p
             )
+            self.__public_key = self.__private_key.get_verifying_key()
+
+        if public_key is not None:
+            self.__public_key = VerifyingKey.from_string(
+                b58decode(public_key)[1:],
+                curve=NIST256p
+            )
 
         if public_key is None and private_key is None:
-            self.__private_key = SigningKey.generate(curve=NIST256p, hashfunc=sha256)
+            self.__private_key = SigningKey.generate(curve=NIST256p)
             self.__public_key = self.__private_key.get_verifying_key()
 
     @property
