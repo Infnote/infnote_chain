@@ -25,17 +25,17 @@ pprint = PrettyPrinter(indent=4).pprint
 # Get all saved chains
 pprint([chain.info for chain in Blockchain.all_chains()])
 
-
 # Receive a block
 block = Block({
-    "chain_id": "MZWxmTCSxTzMEdgrvq38EctqdVjTpi5JFB3ZS5kgWqRExXK3nNaM5BZuWau8B6rmJpEdzu15deAk1jwUQqiHpCJw",
-    "hash": "96f7cwpawVQ8m5zfc1VRz7b1kqNPHLzHnXVVMCRG4uHy",
-    "height": 0,
-    "payload": "{\"author\":\"Vergil Choi\",\"desc\":\"Test chain created in iOS.\",\"email\":\"vergil@infnote.com\"," 
-               "\"name\":\"New Chain\",\"version\":\"0.1\",\"website\":\"infnote.com\"}",
-    "signature": "381yXZDtBb7A9K5mU9Fmtjvtjq26irLsykPS3hG87Wkdu5tqYuks3aV48UVnrzARZEYcrWLRnXXLh96aMgg1bMxsY6LkpDUu",
-    "time": 1538555081
+    'chain_id': 'QvCAeP8b6oGYwc5EGmUdnSwN2wLuGBFcm3DN1RADC87KjLstZigsVDkvz3YsjfBkqxcVQRTir6aiTnvg2ssc4Qxi',
+    'hash': '25r7uNHrXHNPmT8hNH5cmDCVdv2TqTvW4aGYWQQps7MX',
+    'height': 0,
+    'payload': '{\"author\":\"Vergil Choi\",\"desc\":\"Created on iOS.\",\"email\":\"vergil@infnote.com\",' 
+               '\"name\":\"Swift Chain\",\"version\":\"0.1\",\"website\":\"infnote.com\"}',
+    'signature': '381yXYiPHmgFM2wLXx3MrSxzso4hWsnRYub7hdzi18agv1eLNvLz2mQ7C91d1Ktw3hyDUFjBjssEdgkJDTjkazvfc5TWW1AX',
+    'time': 1538562151
 })
+
 
 # Check the block
 if block.is_valid:
