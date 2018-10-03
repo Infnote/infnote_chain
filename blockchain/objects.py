@@ -93,9 +93,11 @@ class Blockchain:
         :return:
         """
         info = Database().get_chain(chain_id)
-        if info['private_key'] is not None and len(info['private_key']) > 0:
-            return cls(Key(chain_id, info['private_key']))
-        return cls(Key(chain_id))
+        if info is not None:
+            if info.get('private_key') is not None and len(info['private_key']) > 0:
+                return cls(Key(chain_id, info['private_key']))
+            return cls(Key(chain_id))
+        return None
 
     # TODO: validate information
     @classmethod
@@ -103,8 +105,8 @@ class Blockchain:
         """
         Create a new chain with a genesis block for chain information
 
-        There should be 5 fields:
-        name, version, author, website, email
+        There should be 6 fields:
+        name, version, author, website, email, desc
 
         :param kwargs: chain info
         :return: Blockchain
@@ -121,12 +123,17 @@ class Blockchain:
 
     def __init__(self, key: Key):
         self.key = key
-        self.id = self.key.public_key
         self.database = Database()
 
         genesis = self.get_block(0)
         if genesis is not None:
             self.info = json.JSONDecoder().decode(genesis.payload)
+        else:
+            self.info = None
+
+    @property
+    def id(self):
+        return self.key.public_key
 
     @property
     def is_owner(self) -> bool:
@@ -163,11 +170,14 @@ class Blockchain:
                     return True
         return False
 
-    def save(self):
-        self.database.save_chain({
-            'public_key': self.key.public_key,
-            'private_key': self.key.private_key
-        })
+    def save(self) -> bool:
+        if Blockchain.load(self.id) is None:
+            self.database.save_chain({
+                'public_key': self.key.public_key,
+                'private_key': self.key.private_key
+            })
+            return True
+        return False
 
     def __getitem__(self, key):
         if isinstance(key, int):

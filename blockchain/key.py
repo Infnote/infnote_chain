@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ecdsa.curves import NIST256p
 from ecdsa.keys import SigningKey, VerifyingKey, BadSignatureError
 from ecdsa.util import sigdecode_der, sigencode_der
@@ -8,6 +10,8 @@ from hashlib import sha256
 
 class Key:
     def __init__(self, public_key: str = None, private_key: str = None):
+        self.__public_key = None
+        self.__private_key = None
         if public_key is not None:
             self.__public_key = VerifyingKey.from_string(
                 b58decode(public_key)[1:],
@@ -34,8 +38,10 @@ class Key:
         return b58encode(b'\x04' + self.__public_key.to_string()).decode('ascii')
 
     @property
-    def private_key(self) -> str:
-        return b58encode(self.__private_key.to_string()).decode('ascii')
+    def private_key(self) -> Optional[str]:
+        if self.__private_key is not None:
+            return b58encode(self.__private_key.to_string()).decode('ascii')
+        return None
 
     def sign(self, data: bytes):
         if self.can_sign:

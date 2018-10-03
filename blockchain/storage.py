@@ -1,4 +1,5 @@
 from pymongo import MongoClient, ASCENDING, DESCENDING
+from .settings import SETTINGS
 
 
 class Singleton(type):
@@ -12,7 +13,8 @@ class Singleton(type):
 
 class Database(metaclass=Singleton):
     def __init__(self):
-        self.database = MongoClient('localhost', 27017).infnote_chain
+        db_settings = SETTINGS['database']
+        self.database = MongoClient(db_settings['host'], db_settings['port'])[db_settings['name']]
 
     def save_chain(self, chain: dict):
         self.database.chains.insert_one(chain)
