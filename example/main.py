@@ -64,13 +64,13 @@ print('Chain saved.' if is_saved else 'Chain is already in database.')
 
 # Save block into database, it will check if the block is valid for this chain before saving
 is_saved = chain.save_block(block)
-print('Block saved.' if is_saved else 'Block failed to save.')
+print('Block saved.' if is_saved else 'Failed to save the block.')
 
 
 # Load a block from database by height in specific chain
 block = chain.get_block(0)
 # Or by block hash
-# block = chain.get_block(block_hash='96f7cwpawVQ8m5zfc1VRz7b1kqNPHLzHnXVVMCRG4uHy')
+# block = chain.get_block(block_hash='25r7uNHrXHNPmT8hNH5cmDCVdv2TqTvW4aGYWQQps7MX')
 
 
 # Get encoded data of a block
