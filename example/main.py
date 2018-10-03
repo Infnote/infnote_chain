@@ -21,6 +21,11 @@ pprint = PrettyPrinter(indent=4).pprint
 #     desc='Example chain for python code test.'
 # )
 
+# Create a new block
+# if chain.is_owner:
+#     block = chain.create_block('Anything you need to put in 😎')
+#     chain.save_block(block)
+
 
 # Get all saved chains
 pprint([chain.info for chain in Blockchain.all_chains()])
