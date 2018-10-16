@@ -35,7 +35,7 @@ class Sentence:
     def question(self):
         return Message(self.dict)
 
-    def answer(self, question):
+    def to(self, question):
         return Message(self.dict,
                        Message.Type.ERROR if self.type == Sentence.Type.ERROR else Message.Type.ANSWER,
                        question.message.identifer)
@@ -239,56 +239,3 @@ class NewBlock(Sentence):
         }
 
 
-class SentenceFactory:
-
-    @staticmethod
-    def load(d):
-        t = d.get('type')
-        if t is None:
-            return None
-
-        if t == 'info':
-            return Info.load(d)
-        elif t == 'error':
-            return Error.load(d)
-        elif t == 'want_peers':
-            return WantPeers.load(d)
-        elif t == 'peers':
-            return Peers.load(d)
-        elif t == 'want_blocks':
-            return WantBlocks.load(d)
-        elif t == 'blocks':
-            return Blocks.load(d)
-        elif t == 'new_block':
-            return NewBlock.load(d)
-
-        return None
-
-    @staticmethod
-    def respond_new_block(new_block: NewBlock) -> WantBlocks:
-        pass
-
-    @staticmethod
-    def respond_want_blocks(want_blocks: WantBlocks):
-        chain = Blockchain.load(want_blocks.chain_id)
-        if chain is None:
-            return None
-
-        blocks = chain.get_blocks(want_blocks.from_height, want_blocks.to_height)
-        if blocks is None:
-            return None
-
-        answer = Blocks()
-        answer.blocks = blocks
-        return answer
-
-    @staticmethod
-    def respond_want_peers(want_peers: WantPeers) -> Peers:
-        pass
-
-    @staticmethod
-    def create_new_block(chain: Blockchain) -> NewBlock:
-        response = NewBlock()
-        response.chain_id = chain.id
-        response.height = chain.height
-        return response

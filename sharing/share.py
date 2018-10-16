@@ -2,7 +2,8 @@ import asyncio
 
 from threading import Thread
 from networking import Peer, Message, Server
-from .sentence import Sentence, Info, SentenceFactory
+from .sentence import Sentence, Info
+from .factory import SentenceFactory as Factory
 
 from utils.logger import default_logger as log
 
@@ -11,6 +12,7 @@ class ShareManager:
     def __init__(self):
         self.servers = []
         self.clients = []
+        self.boardcast_cache = {}
 
     def start(self):
         for peer in self.servers:
@@ -40,35 +42,43 @@ class ShareManager:
 
     async def handle(self, message: Message, peer: Peer):
         if message.type == Message.Type.QUESTION:
-            sentence = SentenceFactory.load(message.content)
+            sentence = Factory.load(message.content)
             if sentence is not None:
-                sentence.message = message
                 await self.answer(sentence, peer)
 
-    @staticmethod
-    async def answer(sentence, peer):
-        log.debug(f'Legal Sentence:\n{sentence}')
+    async def answer(self, question, peer: Peer):
+        log.debug(f'Legal Sentence:\n{question}')
 
         answer = None
-        msg = None
-        if sentence.type == Sentence.Type.NEW_BLOCK:
-            answer = SentenceFactory.respond_new_block(sentence)
-            msg = answer.question
-        elif sentence.type == Sentence.Type.WANT_BLOCKS:
-            answer = SentenceFactory.respond_want_blocks(sentence)
-            msg = answer.answer(sentence)
-        elif sentence.type == Sentence.Type.WANT_PEERS:
-            answer = SentenceFactory.respond_want_peers(sentence)
-            msg = answer.answer(sentence)
-        elif sentence.type == Sentence.Type.INFO:
+        if question.type == Sentence.Type.NEW_BLOCK:
+            wb = Factory.want_blocks_for_new_block(question)
+            if wb is not None:
+                await peer.send(wb.question)
+            if self.boardcast_cache.get(question.message.identifer) is None:
+                self.boardcast_cache[question.message.identifer] = question
+                self.boardcast(question, peer)
+            return
+        elif question.type == Sentence.Type.INFO:
             answer = Info()
-            msg = answer.answer(sentence)
+            if answer is not None:
+                await peer.send(Info().to(question))
+                for want_blocks in Factory.want_blocks_for_info(question):
+                    await peer.send(want_blocks.question, lambda m: Factory.handle_blocks(Factory.load(m)))
+                want_peers = Factory.want_peers_for_info(question)
+                if want_peers is not None:
+                    await peer.send(want_peers.question, lambda m: Factory.handle_peers(Factory.load(m)))
+            return
+        elif question.type == Sentence.Type.WANT_BLOCKS:
+            answer = Factory.send_blocks(question)
+        elif question.type == Sentence.Type.WANT_PEERS:
+            answer = Factory.send_peers(question)
 
-        if answer is not None and msg is not None:
-            log.debug(f'Answering to {peer}:\n{answer}')
-            await peer.send(msg)
+        if answer is not None:
+            await peer.send(answer.to(question))
 
-    def boardcast(self, sentence):
+    def boardcast(self, sentence, without=None):
         log.debug(f'Boardcasting: {sentence}')
         for peer in self.servers:
+            if peer is without:
+                continue
             asyncio.get_event_loop().run_until_complete(peer.send(sentence.question))

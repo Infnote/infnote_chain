@@ -1,0 +1,121 @@
+from .sentence import *
+from typing import Optional
+from networking import PeerManager
+
+
+class SentenceFactory:
+
+    @staticmethod
+    def load(message: Message):
+        d = message.content
+        t = d.get('type')
+        if t is None:
+            return None
+
+        result = None
+        if t == 'info':
+            result = Info.load(d)
+        elif t == 'error':
+            result = Error.load(d)
+        elif t == 'want_peers':
+            result = WantPeers.load(d)
+        elif t == 'peers':
+            result = Peers.load(d)
+        elif t == 'want_blocks':
+            result = WantBlocks.load(d)
+        elif t == 'blocks':
+            result = Blocks.load(d)
+        elif t == 'new_block':
+            result = NewBlock.load(d)
+
+        if result is not None:
+            result.message = message
+            return result
+        return None
+
+    @staticmethod
+    def want_blocks(chain_id, start, end) -> WantBlocks:
+        r = WantBlocks()
+        r.chain_id = chain_id
+        r.from_height = start
+        r.to_height = end
+        return r
+
+    @classmethod
+    def want_blocks_for_new_block(cls, new_block: NewBlock) -> Optional[WantBlocks]:
+        chain = Blockchain.load(new_block.chain_id)
+        if chain is not None:
+            if chain.height < new_block.height:
+                return cls.want_blocks(new_block.chain_id, chain.height, new_block.height - 1)
+        elif new_block.height > 0:
+            return cls.want_blocks(new_block.chain_id, 0, new_block.height - 1)
+        return None
+
+    @classmethod
+    def want_blocks_for_info(cls, info: Info) -> list:
+        result = []
+        for chain_id, height in info.chains:
+            chain = Blockchain.load(chain_id)
+            if chain is None:
+                result.append(cls.want_blocks(chain_id, 0, height - 1))
+            elif chain.height < height:
+                result.append(cls.want_blocks(chain_id, chain.height, height - 1))
+        return result
+
+    @classmethod
+    def want_peers_for_info(cls, info: Info) -> Optional[WantPeers]:
+        if info.peers > 0:
+            return WantPeers(count=info.peers)
+        return None
+
+    @staticmethod
+    def send_blocks(want_blocks: WantBlocks) -> Optional[Blocks]:
+        chain = Blockchain.load(want_blocks.chain_id)
+        if chain is None:
+            return None
+
+        blocks = chain.get_blocks(want_blocks.from_height, want_blocks.to_height)
+        if blocks is None:
+            return None
+
+        answer = Blocks()
+        answer.blocks = blocks
+        return answer
+
+    @staticmethod
+    def send_peers(want_peers: WantPeers) -> Optional[Peers]:
+        peers = []
+        for result in PeerManager().peers(want_peers.count):
+            peer = Peer(result['address'], result['port'])
+            peers.append(peer)
+        if len(peers) <= 0:
+            return None
+
+        response = Peers()
+        response.peers = peers
+        return response
+
+    @staticmethod
+    def new_block(chain: Blockchain) -> NewBlock:
+        response = NewBlock()
+        response.chain_id = chain.id
+        response.height = chain.height
+        return response
+
+    @staticmethod
+    def handle_peers(peers: Peers):
+        if peers is None:
+            return
+
+        # TODO: need a better peers updating strategy
+        for peer in peers.peers:
+            PeerManager().add_peer(peer)
+
+    @staticmethod
+    def handle_blocks(blocks: Blocks):
+        if blocks is None:
+            return
+
+        # TODO: need to mark bad chain (when there is two blocks which have same height)
+        for block in blocks.blocks:
+            Blockchain.load(block.chain_id).save_block(block)
