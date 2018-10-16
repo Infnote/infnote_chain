@@ -88,7 +88,7 @@ chain = chains[0]
 
 def create_block():
     pre = ''.join(random.choice(['Cool', 'Nice', 'Great', 'Yeah', 'Gorgeous']))
-    suf = ''.join(random.choice('😎🤔😎🎉👍'))
+    suf = ''.join(random.choice('😎🤔😆🎉👍'))
     block = chain.create_block({
         'title': 'New Article (' + ''.join(random.choices(string.hexdigits, k=6)) + ')',
         'content': pre + ' ' + suf

@@ -3,5 +3,6 @@
     "host": "localhost",
     "port": 27017,
     "name": "infnote_chain"
-  }
+  },
+  "debug": true
 }

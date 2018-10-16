@@ -5,6 +5,8 @@ from typing import Any
 from dataclasses import dataclass
 from .peer import Peer
 
+from utils.logger import default_logger as log
+
 
 @dataclass
 class Server:
@@ -12,6 +14,7 @@ class Server:
     peer_out: Any = None
 
     def start(self):
+        log.info('Start server at 8080')
         asyncio.set_event_loop(asyncio.new_event_loop())
         server = websockets.serve(self.handle, '0.0.0.0', '8080')
         asyncio.get_event_loop().run_until_complete(server)

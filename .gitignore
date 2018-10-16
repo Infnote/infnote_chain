@@ -63,3 +63,6 @@ target/
 # Pipenv
 .venv/
 Pipfile.lock
+
+# VS Code
+.vscode/

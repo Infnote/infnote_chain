@@ -36,3 +36,6 @@ class Message:
             'content': self.content
         }
         return JSONEncoder(ensure_ascii=False, separators=(',', ':')).encode(json)
+
+    def __repr__(self):
+        return f'<Message: {self.identifer} - {self.type}>'

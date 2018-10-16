@@ -2,6 +2,8 @@ from .message import Message
 from typing import Any
 from dataclasses import dataclass, field
 
+from utils.logger import default_logger as log
+
 
 @dataclass
 class Dispatcher:
@@ -19,4 +21,4 @@ class Dispatcher:
         elif self.global_handler is not None:
             await self.global_handler(message, peer)
         else:
-            print(message)
+            log.warn('Missing gloabel handler for receiving messages.')
