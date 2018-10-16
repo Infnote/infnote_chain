@@ -2,7 +2,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from networking import Message
 from functools import reduce
-from networking import Peer
+from networking import Peer, PeerManager
 from blockchain import Block, Blockchain
 
 
@@ -61,6 +61,8 @@ class Info(Sentence):
         chains = Blockchain.all_chains()
         for chain in chains:
             self.chains[chain.id] = chain.height
+
+        self.peers = PeerManager().count
 
     @classmethod
     def load(cls, d):

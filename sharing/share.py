@@ -1,7 +1,7 @@
 import asyncio
 
 from threading import Thread
-from networking import Peer, Message, Server
+from networking import Peer, Message, Server, PeerManager
 from .sentence import Sentence, Info
 from .factory import SentenceFactory as Factory
 
@@ -10,7 +10,7 @@ from utils.logger import default_logger as log
 
 class ShareManager:
     def __init__(self):
-        self.servers = []
+        self.servers = [peer for peer in PeerManager().peers(without_self=True) if peer.address]
         self.clients = []
         self.boardcast_cache = {}
 
@@ -24,6 +24,10 @@ class ShareManager:
         server.peer_in = self.peer_in
         server.peer_out = self.peer_out
         Thread(target=server.start).start()
+
+    def refresh(self):
+        # TODO: need a connection strategy (when current connections is less then specific number)
+        pass
 
     async def peer_in(self, peer):
         log.info(f'Peer in : {peer}')
@@ -39,6 +43,7 @@ class ShareManager:
             self.servers.remove(peer)
         else:
             self.clients.remove(peer)
+        self.refresh()
 
     async def handle(self, message: Message, peer: Peer):
         if message.type == Message.Type.QUESTION:

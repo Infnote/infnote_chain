@@ -95,7 +95,7 @@ def create_block():
     })
     chain.save_block(block)
 
-    sen = SentenceFactory.create_new_block(chain)
+    sen = SentenceFactory.new_block(chain)
     manager.boardcast(sen)
 
 

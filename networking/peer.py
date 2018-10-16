@@ -97,16 +97,30 @@ class PeerManager(metaclass=Singleton):
         return self.all_peers().count()
 
     def all_peers(self) -> [Peer]:
-        return self.database.peers.find()
+        return [Peer(**peer) for peer in self.database.peers.find()]
 
-    def peers(self, count=10) -> [Peer]:
-        return self.database.peers.find().sort('rank', DESCENDING).limit(count)
+    def peers(self, count=10, without_self=False) -> [Peer]:
+        query = {}
+        if without_self:
+            query['address'] = {
+                '$nin': [settings.server.address, '0.0.0.0', 'localhost', '127.0.0.1']
+            }
+        return [Peer(**peer) for peer in self.database.peers.find(query).sort('rank', DESCENDING).limit(count)]
 
     def add_peer(self, peer: Peer):
-        return self.database.peers.update_one({}, peer.dict, upsert=True)
+        return self.database.peers.update_one(
+            {'address': peer.address},
+            {'$set': {'address': peer.address, 'port': peer.port, 'rank': peer.rank}},
+            upsert=True
+        )
 
     def migrate(self):
         self.database.peers.create_index([('address', ASCENDING)], unique=True)
+        self.database.peers.update_one(
+            {'address': settings.server.address},
+            {'$set': {'address': settings.server.address, 'port': settings.server.port, 'rank': 100}},
+            upsert=True
+        )
 
     def __repr__(self):
         arrage_rank = self.database.peer.aggregate(
