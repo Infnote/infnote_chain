@@ -6,9 +6,8 @@ from .message import Message
 from .dispatcher import Dispatcher
 from dataclasses import dataclass
 from typing import Any
-from utils import Singleton
-from utils.settings import SETTINGS
-from pymongo import MongoClient, ASCENDING
+from utils import Singleton, settings
+from pymongo import MongoClient, ASCENDING, DESCENDING
 
 from utils.logger import default_logger as log
 
@@ -90,21 +89,34 @@ class Peer:
 class PeerManager(metaclass=Singleton):
 
     def __init__(self):
-        db_settings = SETTINGS['database']
-        self.database = MongoClient(db_settings['host'], db_settings['port'])[db_settings['name']]
+        db_settings = settings.database
+        self.database = MongoClient(db_settings.host, db_settings.port)[db_settings.name]
 
     @property
     def count(self) -> int:
-        return 0
+        return self.all_peers().count()
 
     def all_peers(self) -> [Peer]:
-        pass
+        return self.database.peers.find()
 
     def peers(self, count=10) -> [Peer]:
-        pass
+        return self.database.peers.find().sort('rank', DESCENDING).limit(count)
 
     def add_peer(self, peer: Peer):
-        pass
+        return self.database.peers.update_one({}, peer.dict, upsert=True)
 
     def migrate(self):
         self.database.peers.create_index([('address', ASCENDING)], unique=True)
+
+    def __repr__(self):
+        arrage_rank = self.database.peer.aggregate(
+            {
+                '$group': {
+                    '_id': '$by_user',
+                    'rank': {
+                        '$avg': '$rank'
+                    }
+                }
+            }
+        )['rank']
+        return "<PeerManager: %d peers, rank %.02f(avg.)>" % (self.count, arrage_rank)

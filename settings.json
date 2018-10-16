@@ -4,5 +4,9 @@
     "port": 27017,
     "name": "infnote_chain"
   },
-  "debug": true
+  "debug": true,
+  "server": {
+    "address": null,
+    "port": "8080"
+  }
 }

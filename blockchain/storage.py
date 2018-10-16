@@ -1,12 +1,11 @@
 from pymongo import MongoClient, ASCENDING, DESCENDING
-from utils import Singleton
-from utils.settings import SETTINGS
+from utils import Singleton, settings
 
 
 class Database(metaclass=Singleton):
     def __init__(self):
-        db_settings = SETTINGS['database']
-        self.database = MongoClient(db_settings['host'], db_settings['port'])[db_settings['name']]
+        db_settings = settings.database
+        self.database = MongoClient(db_settings.host, db_settings.port)[db_settings.name]
 
     def save_chain(self, chain: dict):
         self.database.chains.insert_one(chain)
