@@ -1,9 +1,10 @@
-# import random
-# import string
+import random
+import string
 
 from pprint import PrettyPrinter
-from blockchain import *
+# from blockchain import *
 
+from sharing import *
 
 pprint = PrettyPrinter(indent=4).pprint
 
@@ -28,51 +29,77 @@ pprint = PrettyPrinter(indent=4).pprint
 
 
 # Get all saved chains
-pprint([chain.info for chain in Blockchain.all_chains()])
+# pprint([chain.info for chain in Blockchain.all_chains()])
 
 # Receive a block
-block = Block({
-    'chain_id': 'QvCAeP8b6oGYwc5EGmUdnSwN2wLuGBFcm3DN1RADC87KjLstZigsVDkvz3YsjfBkqxcVQRTir6aiTnvg2ssc4Qxi',
-    'hash': '25r7uNHrXHNPmT8hNH5cmDCVdv2TqTvW4aGYWQQps7MX',
-    'height': 0,
-    'payload': '{\"author\":\"Vergil Choi\",\"desc\":\"Created on iOS.\",\"email\":\"vergil@infnote.com\",' 
-               '\"name\":\"Swift Chain\",\"version\":\"0.1\",\"website\":\"infnote.com\"}',
-    'signature': '381yXYiPHmgFM2wLXx3MrSxzso4hWsnRYub7hdzi18agv1eLNvLz2mQ7C91d1Ktw3hyDUFjBjssEdgkJDTjkazvfc5TWW1AX',
-    'time': 1538562151
-})
+# block = Block({
+#     'chain_id': 'QvCAeP8b6oGYwc5EGmUdnSwN2wLuGBFcm3DN1RADC87KjLstZigsVDkvz3YsjfBkqxcVQRTir6aiTnvg2ssc4Qxi',
+#     'hash': '25r7uNHrXHNPmT8hNH5cmDCVdv2TqTvW4aGYWQQps7MX',
+#     'height': 0,
+#     'payload': '{\"author\":\"Vergil Choi\",\"desc\":\"Created on iOS.\",\"email\":\"vergil@infnote.com\",'
+#                '\"name\":\"Swift Chain\",\"version\":\"0.1\",\"website\":\"infnote.com\"}',
+#     'signature': '381yXYiPHmgFM2wLXx3MrSxzso4hWsnRYub7hdzi18agv1eLNvLz2mQ7C91d1Ktw3hyDUFjBjssEdgkJDTjkazvfc5TWW1AX',
+#     'time': 1538562151
+# })
 
 
 # Check the block
-if block.is_valid:
-    print('Valid block received.')
-else:
-    print('Invalid block received.')
+# if block.is_valid:
+#     print('Valid block received.')
+# else:
+#     print('Invalid block received.')
 
 
 # Create a instance for exist chain
-key = Key(block.chain_id)
-chain = Blockchain(key)
-print('Chain ID: ' + chain.id)
-print('Owner: ' + ('YES' if chain.is_owner else 'NO'))
+# key = Key(block.chain_id)
+# chain = Blockchain(key)
+# print('Chain ID: ' + chain.id)
+# print('Owner: ' + ('YES' if chain.is_owner else 'NO'))
 
 
 # Save chain (only public key and private key if valid) into database
 # It will check if the chain is already database
-is_saved = chain.save()
-print('Chain saved.' if is_saved else 'Chain is already in database.')
+# is_saved = chain.save()
+# print('Chain saved.' if is_saved else 'Chain is already in database.')
 
 
 # Save block into database, it will check if the block is valid for this chain before saving
-is_saved = chain.save_block(block)
-print('Block saved.' if is_saved else 'Failed to save the block.')
+# is_saved = chain.save_block(block)
+# print('Block saved.' if is_saved else 'Failed to save the block.')
 
 
 # Load a block from database by height in specific chain
-block = chain.get_block(0)
+# block = chain.get_block(0)
 # Or by block hash
 # block = chain.get_block(block_hash='25r7uNHrXHNPmT8hNH5cmDCVdv2TqTvW4aGYWQQps7MX')
 
 
 # Get encoded data of a block
-if block is not None:
-    print(block.data)
+# if block is not None:
+#     print(block.data)
+
+
+manager = ShareManager()
+manager.start()
+
+chains = [chain for chain in Blockchain.all_chains() if chain.is_owner]
+chain = chains[0]
+
+
+def create_block():
+    pre = ''.join(random.choice(['Cool', 'Nice', 'Great', 'Yeah', 'Gorgeous']))
+    suf = ''.join(random.choice('😎🤔😎🎉👍'))
+    block = chain.create_block({
+        'title': 'New Article (' + ''.join(random.choices(string.hexdigits, k=6)) + ')',
+        'content': pre + ' ' + suf
+    })
+    chain.save_block(block)
+
+    sen = SentenceFactory.create_new_block(chain)
+    manager.boardcast(sen)
+
+
+while True:
+    cmd = input()
+    if cmd == 'create':
+        create_block()

@@ -1,5 +1,6 @@
 import json
 
+from dataclasses import dataclass
 from calendar import timegm
 from typing import Optional
 from datetime import datetime
@@ -9,15 +10,17 @@ from .key import Key
 from .storage import Database
 
 
+@dataclass
 class Block:
+    block_hash: str = ''
+    prev_hash: str = ''
+    time: datetime = datetime.utcnow()
+    signature: str = ''
+    chain_id: str = ''
+    height: int = 0
+    payload: str = ''
+
     def __init__(self, data: dict = None):
-        self.block_hash = ''
-        self.prev_hash = ''
-        self.time = datetime.utcnow()
-        self.signature = ''
-        self.chain_id = '',
-        self.height = 0,
-        self.payload = ''
         if data is not None:
             self.block_hash = data.get('hash')
             self.prev_hash = data.get('prev_hash')
@@ -152,13 +155,21 @@ class Blockchain:
         info = self.database.get_block(self.id, height, block_hash)
         return Block(info) if info is not None else None
 
+    def get_blocks(self, start: int, end: int):
+        blocks = self.database.get_blocks(self.id, start, end)
+        if blocks is not None:
+            return [Block(info) for info in blocks]
+        return None
+
     def create_block(self, payload: str) -> Block:
+        if isinstance(payload, dict):
+            payload = json.JSONEncoder(separators=(',', ':'), ensure_ascii=False).encode(payload)
         block = Block()
         block.payload = payload
         block.chain_id = self.id
         block.height = self.height
         if block.height > 0:
-            block.prev_hash = self.database.get_block(self.id, block.height - 1).block_hash
+            block.prev_hash = self.database.get_block(self.id, block.height - 1)['hash']
         block.block_hash = b58encode(sha256(block.data_for_hashing).digest()).decode('utf8')
         block.signature = b58encode(self.key.sign(block.data_for_hashing)).decode('utf8')
         return block
