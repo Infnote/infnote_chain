@@ -6,7 +6,7 @@
   },
   "debug": true,
   "server": {
-    "address": null,
-    "port": "32767"
+    "address": "auto",
+    "port": 32767
   }
 }

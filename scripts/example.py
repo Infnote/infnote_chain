@@ -85,6 +85,8 @@ manager.start()
 chains = [chain for chain in Blockchain.all_chains() if chain.is_owner]
 chain = chains[0]
 
+log.info(PeerManager())
+
 
 def create_block():
     pre = ''.join(random.choice(['Cool', 'Nice', 'Great', 'Yeah', 'Gorgeous']))

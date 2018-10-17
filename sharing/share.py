@@ -47,9 +47,11 @@ class ShareManager:
 
     async def handle(self, message: Message, peer: Peer):
         if message.type == Message.Type.QUESTION:
-            sentence = Factory.load(message.content)
+            sentence = Factory.load(message)
             if sentence is not None:
                 await self.answer(sentence, peer)
+            else:
+                log.warn(f'Bad sentence:\n{message.content}')
 
     async def answer(self, question, peer: Peer):
         log.debug(f'Legal Sentence:\n{question}')

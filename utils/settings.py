@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from collections import namedtuple
 from .getip import get_host_ip
@@ -43,7 +44,7 @@ with open(os.path.dirname(__file__) + '/../settings.json', 'r') as file:
     server = user.get('server')
     if server is not None and isinstance(server, dict):
         address = server.get('address')
-        if address is None:
+        if address is None or address == 'auto':
             address = get_host_ip()
         __SETTINGS['server']['address'] = address
         __SETTINGS['server']['port'] = server.get('port')

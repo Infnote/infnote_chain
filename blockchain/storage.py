@@ -1,5 +1,6 @@
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from utils import Singleton, settings
+from utils.logger import default_logger as log
 
 
 class Database(metaclass=Singleton):
@@ -35,5 +36,7 @@ class Database(metaclass=Singleton):
         return self.database.blocks.count({'chain_id': chain_id})
 
     def migrate(self):
+        log.info('Create index for "public_key" in "chains".')
         self.database.chains.create_index([('public_key', ASCENDING)], unique=True)
+        log.info('Create index for "height" in "blocks".')
         self.database.blocks.create_index([('height', DESCENDING)])

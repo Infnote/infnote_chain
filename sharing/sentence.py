@@ -41,9 +41,13 @@ class Sentence:
                        question.message.identifer)
 
     def __repr__(self):
-        max_width = reduce(lambda result, x: result if result > x else x, self.dict.keys(), 0)
-        spaces = ' ' * max_width
-        return reduce(lambda result, x: f'{result}[{x[0]}{spaces}] {x[1]}', self.dict, '')
+        max_width = reduce(lambda r, x: r if r > len(x) else len(x), self.dict.keys(), 0)
+        result = ''
+        for key, value in self.dict.items():
+            if isinstance(value, dict):
+                value = len(value.keys())
+            result += f'[{key}{" " * (max_width - len(key))}] {value}\n'
+        return result
 
 
 @dataclass
@@ -88,6 +92,9 @@ class Info(Sentence):
             'full_node': self.is_full_node
         }
 
+    def __repr__(self):
+        return super().__repr__()
+
 
 @dataclass
 class Error(Sentence):
@@ -115,6 +122,9 @@ class Error(Sentence):
             'desc': self.desc
         }
 
+    def __repr__(self):
+        return super().__repr__()
+
 
 @dataclass
 class WantPeers(Sentence):
@@ -128,6 +138,7 @@ class WantPeers(Sentence):
         want_peers = cls()
         try:
             want_peers.count = d['count']
+            return want_peers
         except (KeyError, ValueError):
             return None
 
@@ -137,6 +148,9 @@ class WantPeers(Sentence):
             **super().dict,
             'count': self.count
         }
+
+    def __repr__(self):
+        return super().__repr__()
 
 
 @dataclass
@@ -151,6 +165,7 @@ class Peers(Sentence):
         peers = cls()
         try:
             peers.peers = [Peer(address=peer['address'], port=peer['port']) for peer in d['peers']]
+            return peers
         except (KeyError, ValueError):
             return None
 
@@ -160,6 +175,9 @@ class Peers(Sentence):
             **super().dict,
             'peers': [peer.dict for peer in self.peers]
         }
+
+    def __repr__(self):
+        return super().__repr__()
 
 
 @dataclass
@@ -191,6 +209,9 @@ class WantBlocks(Sentence):
             'to': self.to_height
         }
 
+    def __repr__(self):
+        return super().__repr__()
+
 
 @dataclass
 class Blocks(Sentence):
@@ -204,6 +225,7 @@ class Blocks(Sentence):
         blocks = cls()
         try:
             blocks.blocks = [Block(data) for data in d['blocks']]
+            return blocks
         except (KeyError, ValueError):
             return None
 
@@ -213,6 +235,9 @@ class Blocks(Sentence):
             **super().dict,
             'blocks': [block.dict for block in self.blocks]
         }
+
+    def __repr__(self):
+        return super().__repr__()
 
 
 @dataclass
@@ -229,6 +254,7 @@ class NewBlock(Sentence):
         try:
             new_block.chain_id = d['chain_id']
             new_block.height = d['height']
+            return new_block
         except (KeyError, ValueError):
             return None
 
@@ -240,4 +266,6 @@ class NewBlock(Sentence):
             'height': self.height
         }
 
+    def __repr__(self):
+        return super().__repr__()
 

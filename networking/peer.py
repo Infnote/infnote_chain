@@ -79,7 +79,7 @@ class Peer:
                 log.debug(f'Receive message: {msg}')
                 await self.dispatcher.dispatch(msg, self)
             else:
-                log.warn(f'Receive unknown message: {data}')
+                log.warn(f'Bad message:\n{data}')
                 self.rank -= 1
 
     def __repr__(self):
@@ -94,10 +94,10 @@ class PeerManager(metaclass=Singleton):
 
     @property
     def count(self) -> int:
-        return self.all_peers().count()
+        return len(self.all_peers())
 
     def all_peers(self) -> [Peer]:
-        return [Peer(**peer) for peer in self.database.peers.find()]
+        return [Peer(peer['address'], peer['port'], peer['rank']) for peer in self.database.peers.find()]
 
     def peers(self, count=10, without_self=False) -> [Peer]:
         query = {}
@@ -105,7 +105,8 @@ class PeerManager(metaclass=Singleton):
             query['address'] = {
                 '$nin': [settings.server.address, '0.0.0.0', 'localhost', '127.0.0.1']
             }
-        return [Peer(**peer) for peer in self.database.peers.find(query).sort('rank', DESCENDING).limit(count)]
+        result = self.database.peers.find(query).sort('rank', DESCENDING).limit(count)
+        return [Peer(peer['address'], peer['port'], peer['rank']) for peer in result]
 
     def add_peer(self, peer: Peer):
         return self.database.peers.update_one(
@@ -115,7 +116,9 @@ class PeerManager(metaclass=Singleton):
         )
 
     def migrate(self):
+        log.info('Create index for "address" in "peers".')
         self.database.peers.create_index([('address', ASCENDING)], unique=True)
+        log.info(f'Add this host as a peer to "peers" ({settings.server.address}:{settings.server.port}).')
         self.database.peers.update_one(
             {'address': settings.server.address},
             {'$set': {'address': settings.server.address, 'port': settings.server.port, 'rank': 100}},
@@ -123,14 +126,15 @@ class PeerManager(metaclass=Singleton):
         )
 
     def __repr__(self):
-        arrage_rank = self.database.peer.aggregate(
-            {
+        result = self.database.peers.aggregate(
+            [{
                 '$group': {
                     '_id': '$by_user',
                     'rank': {
                         '$avg': '$rank'
                     }
                 }
-            }
-        )['rank']
-        return "<PeerManager: %d peers, rank %.02f(avg.)>" % (self.count, arrage_rank)
+            }]
+        )
+        arrange_rank = list(result)[0]['rank']
+        return "<PeerManager: %d peers, rank %.02f(avg.)>" % (self.count, arrange_rank)

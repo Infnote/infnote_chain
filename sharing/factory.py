@@ -85,8 +85,7 @@ class SentenceFactory:
     @staticmethod
     def send_peers(want_peers: WantPeers) -> Optional[Peers]:
         peers = []
-        for result in PeerManager().peers(want_peers.count):
-            peer = Peer(result['address'], result['port'])
+        for peer in PeerManager().peers(want_peers.count):
             peers.append(peer)
         if len(peers) <= 0:
             return None
