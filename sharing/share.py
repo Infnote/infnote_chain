@@ -63,7 +63,7 @@ class ShareManager:
                 await peer.send(wb.question, lambda m, _: Factory.handle_blocks(Factory.load(m)))
             if self.boardcast_cache.get(question.message.identifer) is None:
                 self.boardcast_cache[question.message.identifer] = question
-                self.boardcast(question, peer)
+                await self.boardcast(question, peer)
             return
         elif question.type == Sentence.Type.INFO:
             answer = Info()
@@ -83,10 +83,9 @@ class ShareManager:
         if answer is not None:
             await peer.send(answer.to(question))
 
-    def boardcast(self, sentence, without=None):
+    async def boardcast(self, sentence, without=None):
         log.debug(f'Boardcasting:\n{sentence}')
         for peer in self.servers + self.clients:
             if without is not None and peer.address == without.address and peer.port == without.port:
                 continue
-            asyncio.set_event_loop(asyncio.new_event_loop())
-            asyncio.get_event_loop().run_until_complete(peer.send(sentence.question))
+            await peer.send(sentence.question)
