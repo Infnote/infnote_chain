@@ -118,4 +118,4 @@ class SentenceFactory:
 
         # TODO: need to mark bad chain (when there is two blocks which have same height)
         for block in blocks.blocks:
-            Blockchain.load(block.chain_id).save_block(block)
+            Blockchain.remote_chain(block.chain_id).save_block(block)

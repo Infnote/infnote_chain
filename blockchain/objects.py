@@ -93,6 +93,15 @@ class Blockchain:
         return [cls(Key(obj['public_key'], obj['private_key'])) for obj in objects]
 
     @classmethod
+    def remote_chain(cls, public_key):
+        chain = cls.load(public_key)
+        if chain is None:
+            remote = cls(Key(public_key))
+            remote.save()
+            return remote
+        return chain
+
+    @classmethod
     def load(cls, chain_id: str):
         """
         Load a exist chain from database
