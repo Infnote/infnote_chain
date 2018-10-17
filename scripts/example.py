@@ -1,5 +1,6 @@
 import random
 import string
+import asyncio
 
 from pprint import PrettyPrinter
 # from blockchain import *
@@ -97,11 +98,12 @@ def create_block():
     })
     chain.save_block(block)
 
-    boardcast()
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    asyncio.get_event_loop().run_until_complete(boardcast())
 
 
-def boardcast():
-    manager.boardcast(SentenceFactory.new_block(chain))
+async def boardcast():
+    await manager.boardcast(SentenceFactory.new_block(chain))
 
 
 while True:
