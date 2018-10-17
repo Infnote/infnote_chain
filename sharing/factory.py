@@ -54,7 +54,7 @@ class SentenceFactory:
     @classmethod
     def want_blocks_for_info(cls, info: Info) -> list:
         result = []
-        for chain_id, height in info.chains:
+        for chain_id, height in info.chains.items():
             chain = Blockchain.load(chain_id)
             if chain is None:
                 result.append(cls.want_blocks(chain_id, 0, height - 1))
