@@ -190,7 +190,7 @@ class Blockchain:
                 return True
             elif self.height > 0:
                 prev = self.get_block(block.height - 1)
-                if prev.block_hash == block.prev_hash:
+                if prev is not None and prev.block_hash == block.prev_hash:
                     self.database.save_block(block.dict)
                     return True
         return False
