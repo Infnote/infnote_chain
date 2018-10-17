@@ -54,7 +54,7 @@ class ShareManager:
                 log.warn(f'Bad sentence:\n{message.content}')
 
     async def answer(self, question, peer: Peer):
-        log.debug(f'Legal Sentence:\n{question}')
+        log.debug(f'Legal Question:\n{question}')
 
         answer = None
         if question.type == Sentence.Type.NEW_BLOCK:

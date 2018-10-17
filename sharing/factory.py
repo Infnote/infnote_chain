@@ -1,6 +1,7 @@
 from .sentence import *
 from typing import Optional
 from networking import PeerManager
+from utils.logger import default_logger as log
 
 
 class SentenceFactory:
@@ -107,6 +108,7 @@ class SentenceFactory:
         if peers is None:
             return
 
+        log.debug(f'Legal Answer:\n{peers}')
         # TODO: need a better peers updating strategy
         for peer in peers.peers:
             PeerManager().add_peer(peer)
@@ -116,6 +118,7 @@ class SentenceFactory:
         if blocks is None:
             return
 
+        log.debug(f'Legal Answer:\n{blocks}')
         # TODO: need to mark bad chain (when there is two blocks which have same height)
         for block in blocks.blocks:
             Blockchain.remote_chain(block.chain_id).save_block(block)

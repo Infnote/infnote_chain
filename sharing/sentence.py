@@ -1,3 +1,4 @@
+from platform import uname
 from enum import Enum
 from dataclasses import dataclass, field
 from networking import Message
@@ -58,10 +59,17 @@ class Info(Sentence):
     version: str = '0.1'
     peers: int = 0
     chains: dict = field(default_factory=dict)
-    platform: str = 'Python 3.7'
+    platform: dict = field(default_factory=dict)
     is_full_node: bool = True
 
     def __post_init__(self):
+        info = uname()
+        self.platform = {
+            'system': info.system,
+            'version': info.release,
+            'node': info.node
+        }
+
         chains = Blockchain.all_chains()
         for chain in chains:
             self.chains[chain.id] = chain.height
