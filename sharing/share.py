@@ -60,7 +60,7 @@ class ShareManager:
         if question.type == Sentence.Type.NEW_BLOCK:
             wb = Factory.want_blocks_for_new_block(question)
             if wb is not None:
-                await peer.send(wb.question)
+                await peer.send(wb.question, lambda m, _: Factory.handle_blocks(Factory.load(m)))
             if self.boardcast_cache.get(question.message.identifer) is None:
                 self.boardcast_cache[question.message.identifer] = question
                 self.boardcast(question, peer)

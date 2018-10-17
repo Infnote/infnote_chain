@@ -69,14 +69,14 @@ class Peer:
     async def send(self, message: Message, callback=None):
         if callback is not None:
             self.dispatcher.register(message.identifer, callback)
-        log.debug(f'Sending message: {message}')
+        log.debug(f'Sending: {message} to {self}')
         await self.socket.send(message.dump())
 
     async def recv(self):
         async for data in self.socket:
             msg = Message.load(data)
             if msg is not None:
-                log.debug(f'Receive message: {msg}')
+                log.debug(f'Received: {msg} from {self}')
                 await self.dispatcher.dispatch(msg, self)
             else:
                 log.warn(f'Bad message:\n{data}')
