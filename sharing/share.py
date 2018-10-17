@@ -88,4 +88,5 @@ class ShareManager:
         for peer in self.servers + self.clients:
             if peer is without:
                 continue
+            asyncio.set_event_loop(asyncio.new_event_loop())
             asyncio.get_event_loop().run_until_complete(peer.send(sentence.question))
