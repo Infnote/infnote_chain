@@ -3,7 +3,7 @@ import string
 from enum import Enum
 from json import JSONDecoder, JSONEncoder, JSONDecodeError
 from random import choices
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -15,7 +15,7 @@ class Message:
 
     content: dict = None
     type: Type = Type.QUESTION
-    identifer: str = ''.join(choices(string.digits + string.ascii_letters, k=10))
+    identifer: str = field(default_factory=lambda: ''.join(choices(string.digits + string.ascii_letters, k=10)))
 
     @classmethod
     def load(cls, json_string):

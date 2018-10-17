@@ -57,7 +57,8 @@ class SentenceFactory:
         for chain_id, height in info.chains.items():
             chain = Blockchain.load(chain_id)
             if chain is None:
-                result.append(cls.want_blocks(chain_id, 0, height - 1))
+                if height > 0:
+                    result.append(cls.want_blocks(chain_id, 0, height - 1))
             elif chain.height < height:
                 result.append(cls.want_blocks(chain_id, chain.height, height - 1))
         return result
