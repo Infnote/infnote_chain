@@ -70,10 +70,10 @@ class ShareManager:
             if answer is not None:
                 await peer.send(Info().to(question))
                 for want_blocks in Factory.want_blocks_for_info(question):
-                    await peer.send(want_blocks.question, lambda m: Factory.handle_blocks(Factory.load(m)))
+                    await peer.send(want_blocks.question, lambda m, _: Factory.handle_blocks(Factory.load(m)))
                 want_peers = Factory.want_peers_for_info(question)
                 if want_peers is not None:
-                    await peer.send(want_peers.question, lambda m: Factory.handle_peers(Factory.load(m)))
+                    await peer.send(want_peers.question, lambda m, _: Factory.handle_peers(Factory.load(m)))
             return
         elif question.type == Sentence.Type.WANT_BLOCKS:
             answer = Factory.send_blocks(question)
