@@ -86,8 +86,7 @@ class ShareManager:
     def boardcast(self, sentence, without=None):
         log.debug(f'Boardcasting:\n{sentence}')
         for peer in self.servers + self.clients:
-            # TODO: May need to change for testing
-            if without is not None and peer.address == without.address:
+            if without is not None and peer.address == without.address and peer.port == without.port:
                 continue
             asyncio.set_event_loop(asyncio.new_event_loop())
             asyncio.get_event_loop().run_until_complete(peer.send(sentence.question))

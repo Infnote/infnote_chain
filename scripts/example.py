@@ -97,11 +97,16 @@ def create_block():
     })
     chain.save_block(block)
 
-    sen = SentenceFactory.new_block(chain)
-    manager.boardcast(sen)
+    boardcast()
+
+
+def boardcast():
+    manager.boardcast(SentenceFactory.new_block(chain))
 
 
 while True:
     cmd = input()
     if cmd == 'create':
         create_block()
+    elif cmd == 'bc':
+        boardcast()
