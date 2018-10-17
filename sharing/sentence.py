@@ -225,6 +225,7 @@ class Blocks(Sentence):
         blocks = cls()
         try:
             blocks.blocks = [Block(data) for data in d['blocks']]
+            blocks.blocks.sort(key=lambda e: e.height)
             return blocks
         except (KeyError, ValueError):
             return None
