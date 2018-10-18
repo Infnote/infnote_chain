@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 @dataclass
 class Message:
     class Type(Enum):
-        BOARDCAST = 'boardcast'
+        BROADCAST = 'broadcast'
         QUESTION = 'question'
         ANSWER = 'answer'
         ERROR = 'error'

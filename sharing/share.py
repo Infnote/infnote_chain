@@ -77,16 +77,16 @@ class ShareManager:
         elif answer.type == Sentence.Type.PEERS:
             Factory.handle_peers(answer)
 
-    async def handle_boardcast(self, sentence, peer):
+    async def handle_broadcast(self, sentence, peer):
         if sentence.type == Sentence.Type.NEW_BLOCK:
             wb = Factory.want_blocks_for_new_block(sentence)
             if wb is not None:
                 await self.send_question(wb, peer)
             if self.boardcast_cache.get(sentence.message.identifer) is None:
                 self.boardcast_cache[sentence.message.identifer] = sentence
-                await self.boardcast(sentence, peer)
+                await self.broadcast(sentence, peer)
 
-    async def boardcast(self, sentence, without=None):
+    async def broadcast(self, sentence, without=None):
         log.debug(f'Boardcasting:\n{sentence}')
         for peer in self.servers + self.clients:
             if without is not None and peer.address == without.address and peer.port == without.port:
