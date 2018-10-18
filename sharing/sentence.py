@@ -48,7 +48,7 @@ class Sentence:
             if isinstance(value, dict):
                 value = len(value.keys())
             result += f'[{key}{" " * (max_width - len(key))}] {value}\n'
-        return result
+        return f'{self.message}\n' + result
 
 
 @dataclass
