@@ -16,7 +16,10 @@ class Dispatcher:
     async def dispatch(self, message: Message, peer):
         handler = self.handlers.get(message.identifer)
         if handler is not None:
-            handler(message, peer)
+            try:
+                await handler(message, peer)
+            except TypeError:
+                handler(message, peer)
             del self.handlers[message.identifer]
         elif self.global_handler is not None:
             await self.global_handler(message, peer)

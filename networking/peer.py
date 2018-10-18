@@ -83,7 +83,7 @@ class Peer:
                 self.rank -= 1
 
     def __repr__(self):
-        return f'<Peer{"(Server)" if self.is_server else ""}: {self.address}:{self.port} (rank: {self.rank})>'
+        return f'<Peer{"(server)" if self.is_server else "(client)"}: {self.address}:{self.port} (rank: {self.rank})>'
 
 
 class PeerManager(metaclass=Singleton):

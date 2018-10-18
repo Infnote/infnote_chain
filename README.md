@@ -6,6 +6,7 @@
 - [ ] Blocks request strategy
 - [ ] Refresh connections strategy
 - [ ] Peers updating strategy
+- [ ] Clean boardcast id periodically
 - [ ] Ranking strategy
     - [ ] Bad chain detection
     - [ ] Bad peer detection

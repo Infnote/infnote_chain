@@ -1,5 +1,3 @@
-import asyncio
-
 from threading import Thread
 from networking import Peer, Message, Server, PeerManager
 from .sentence import Sentence, Info
@@ -13,6 +11,18 @@ class ShareManager:
         self.servers = [peer for peer in PeerManager().peers(without_self=True) if peer.address]
         self.clients = []
         self.boardcast_cache = {}
+
+    @staticmethod
+    async def info_actions(info: Info, peer: Peer):
+        if isinstance(info, Message):
+            info = Factory.load(info)
+        if info is None:
+            return
+        for want_blocks in Factory.want_blocks_for_info(info):
+            await peer.send(want_blocks.question, lambda m, _: Factory.handle_blocks(Factory.load(m)))
+        want_peers = Factory.want_peers_for_info(info)
+        if want_peers is not None:
+            await peer.send(want_peers.question, lambda m, _: Factory.handle_peers(Factory.load(m)))
 
     def start(self):
         for peer in self.servers:
@@ -33,7 +43,7 @@ class ShareManager:
         log.info(f'Peer in : {peer}')
         peer.dispatcher.global_handler = self.handle
         if peer.is_server:
-            await peer.send(Info().question)
+            await peer.send(Info().question, self.info_actions)
         else:
             self.clients.append(peer)
 
@@ -69,11 +79,7 @@ class ShareManager:
             answer = Info()
             if answer is not None:
                 await peer.send(Info().to(question))
-                for want_blocks in Factory.want_blocks_for_info(question):
-                    await peer.send(want_blocks.question, lambda m, _: Factory.handle_blocks(Factory.load(m)))
-                want_peers = Factory.want_peers_for_info(question)
-                if want_peers is not None:
-                    await peer.send(want_peers.question, lambda m, _: Factory.handle_peers(Factory.load(m)))
+                await self.info_actions(question, peer)
             return
         elif question.type == Sentence.Type.WANT_BLOCKS:
             answer = Factory.send_blocks(question)

@@ -1,6 +1,5 @@
 import json
 import os
-import re
 
 from collections import namedtuple
 from .getip import get_host_ip
