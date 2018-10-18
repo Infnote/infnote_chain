@@ -48,40 +48,28 @@ class ShareManager:
         if sentence is None:
             log.warn(f'Bad sentence:\n{message.content}')
 
+        log.debug(f'{peer} said:\n{sentence}')
         if message.type == Message.Type.QUESTION:
             await self.handle_question(sentence, peer)
         elif message.type == Message.Type.ANSWER:
             await self.handle_anwser(sentence, peer)
+        elif message.type == Message.Type.BOARDCAST:
+            await self.handle_boardcast(sentence, peer)
 
     async def handle_question(self, question, peer: Peer):
-        log.debug(f'Legal Question from {peer}:\n{question}')
-
         answer = None
-        if question.type == Sentence.Type.NEW_BLOCK:
-            wb = Factory.want_blocks_for_new_block(question)
-            if wb is not None:
-                await peer.send(wb.question)
-            if self.boardcast_cache.get(question.message.identifer) is None:
-                self.boardcast_cache[question.message.identifer] = question
-                await self.boardcast(question, peer)
-            return
-        elif question.type == Sentence.Type.INFO:
+        if question.type == Sentence.Type.INFO:
             answer = Info()
-            if answer is not None:
-                await peer.send(Info().to(question))
-                await self.info_actions(question, peer)
-            return
+            await self.info_actions(question, peer)
         elif question.type == Sentence.Type.WANT_BLOCKS:
             answer = Factory.send_blocks(question)
         elif question.type == Sentence.Type.WANT_PEERS:
             answer = Factory.send_peers(question)
 
         if answer is not None:
-            await peer.send(answer.to(question))
+            await self.send_answer(answer, question, peer)
 
     async def handle_anwser(self, answer, peer: Peer):
-        log.debug(f'Legal Answer from {peer}:\n{answer}')
-
         if answer.type == Sentence.Type.INFO:
             await self.info_actions(answer, peer)
         elif answer.type == Sentence.Type.BLOCKS:
@@ -89,23 +77,41 @@ class ShareManager:
         elif answer.type == Sentence.Type.PEERS:
             Factory.handle_peers(answer)
 
+    async def handle_boardcast(self, sentence, peer):
+        if sentence.type == Sentence.Type.NEW_BLOCK:
+            wb = Factory.want_blocks_for_new_block(sentence)
+            if wb is not None:
+                await self.send_question(wb, peer)
+            if self.boardcast_cache.get(sentence.message.identifer) is None:
+                self.boardcast_cache[sentence.message.identifer] = sentence
+                await self.boardcast(sentence, peer)
+
     async def boardcast(self, sentence, without=None):
         log.debug(f'Boardcasting:\n{sentence}')
         for peer in self.servers + self.clients:
             if without is not None and peer.address == without.address and peer.port == without.port:
                 continue
-            await peer.send(sentence.question)
+            await self.send_question(sentence, peer)
 
-    @staticmethod
-    async def info_actions(info: Info, peer: Peer):
+    async def info_actions(self, info: Info, peer: Peer):
         if isinstance(info, Message):
             info = Factory.load(info)
         if info is None:
             return
 
         for want_blocks in Factory.want_blocks_for_info(info):
-            await peer.send(want_blocks.question)
+            await self.send_question(want_blocks, peer)
 
         want_peers = Factory.want_peers_for_info(info)
         if want_peers is not None:
-            await peer.send(want_peers.question)
+            await self.send_question(want_peers, peer)
+
+    @staticmethod
+    async def send_question(question: Sentence, to: Peer):
+        log.debug(f'Reply to {to}:\n{question}')
+        await to.send(question.question)
+
+    @staticmethod
+    async def send_answer(answer: Sentence, question: Sentence, to: Peer):
+        log.debug(f'Reply to {to}:\n{answer}')
+        await to.send(answer.to(question))
