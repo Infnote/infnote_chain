@@ -12,6 +12,10 @@ class Database(metaclass=Singleton):
         self.database.chains.insert_one(chain)
 
     def save_block(self, block: dict):
+        log.debug(f'New valid block saving:\n'
+                  f'[chain_id] {block["chain_id"]}'
+                  f'[height  ] {block["height"]}'
+                  f'[hash    ] {block["hash"]}')
         self.database.blocks.insert_one(block)
 
     def get_chain(self, public_key: str):
