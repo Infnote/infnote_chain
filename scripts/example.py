@@ -103,7 +103,7 @@ def create_block():
 
 
 async def boardcast():
-    await manager.boardcast(SentenceFactory.new_block(chain))
+    await manager.broadcast(SentenceFactory.new_block(chain))
 
 
 while True:

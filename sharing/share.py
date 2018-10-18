@@ -54,7 +54,7 @@ class ShareManager:
         elif message.type == Message.Type.ANSWER:
             await self.handle_anwser(sentence, peer)
         elif message.type == Message.Type.BOARDCAST:
-            await self.handle_boardcast(sentence, peer)
+            await self.handle_broadcast(sentence, peer)
 
     async def handle_question(self, question, peer: Peer):
         answer = None
@@ -91,7 +91,8 @@ class ShareManager:
         for peer in self.servers + self.clients:
             if without is not None and peer.address == without.address and peer.port == without.port:
                 continue
-            await self.send_question(sentence, peer)
+            await peer.send(sentence.boardcast)
+            log.debug(f'Broadcast sent to {peer}')
 
     async def info_actions(self, info: Info, peer: Peer):
         if isinstance(info, Message):

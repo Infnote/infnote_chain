@@ -48,7 +48,7 @@ class Sentence:
             if isinstance(value, dict):
                 value = len(value.keys())
             result += f'[{key}{" " * (max_width - len(key))}] {value}\n'
-        return f'{self.message}\n' + result
+        return (f'{self.message}\n' if self.message is not None else '') + result
 
 
 @dataclass
@@ -275,6 +275,10 @@ class NewBlock(Sentence):
             'height': self.height
         }
 
+    @property
+    def boardcast(self):
+        return Message(self.dict,
+                       Message.Type.BROADCAST)
+
     def __repr__(self):
         return super().__repr__()
-
