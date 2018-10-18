@@ -53,7 +53,7 @@ class ShareManager:
             await self.handle_question(sentence, peer)
         elif message.type == Message.Type.ANSWER:
             await self.handle_anwser(sentence, peer)
-        elif message.type == Message.Type.BOARDCAST:
+        elif message.type == Message.Type.BROADCAST:
             await self.handle_broadcast(sentence, peer)
 
     async def handle_question(self, question, peer: Peer):
