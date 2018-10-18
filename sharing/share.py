@@ -88,6 +88,8 @@ class ShareManager:
             await self.broadcast(sentence, peer)
 
     async def broadcast(self, sentence, without=None):
+        self.boardcast_cache[sentence.boardcast.identifer] = sentence
+
         log.debug(f'Boardcasting:\n{sentence}')
         for peer in self.servers + self.clients:
             if without is not None and peer.address == without.address and peer.port == without.port:
