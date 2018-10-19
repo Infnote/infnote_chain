@@ -54,11 +54,9 @@ class Main:
                     if isinstance(handler, logging.StreamHandler):
                         log.removeHandler(handler)
                 log.info(f'Running with PID {os.getpid()}')
-
+                log.info(PeerManager())
                 with open('/tmp/infnote_chain.pid', 'w+') as file:
                     file.write(f'{os.getpid()}')
-
-                log.info(PeerManager())
             else:
                 log.info('Infnote Chain P2P Network Started in child process.')
         else:
