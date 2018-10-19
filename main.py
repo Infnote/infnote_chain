@@ -49,10 +49,11 @@ class Main:
         if fork:
             pid = os.fork()
             if pid == 0:
-                ShareManager().start()
                 for handler in list(log.handlers):
-                    if isinstance(handler, logging.StreamHandler):
+                    if not isinstance(handler, logging.FileHandler):
                         log.removeHandler(handler)
+
+                ShareManager().start()
                 log.info(f'Running with PID {os.getpid()}')
                 log.info(PeerManager())
                 with open('/tmp/infnote_chain.pid', 'w+') as file:
