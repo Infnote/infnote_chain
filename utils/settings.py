@@ -16,6 +16,9 @@ __SETTINGS = {
         'address': '0.0.0.0',
         'port': '8080',
     },
+    'peers': {
+        'sync': True
+    }
 }
 
 settings = None
@@ -47,6 +50,12 @@ with open(os.path.dirname(__file__) + '/../settings.json', 'r') as file:
             address = get_host_ip()
         __SETTINGS['server']['address'] = address
         __SETTINGS['server']['port'] = server.get('port')
+
+    peers = user.get('peers')
+    if peers is not None and isinstance(peers, dict):
+        sync = peers.get('sync')
+        if sync is not None:
+            __SETTINGS['peers']['sync'] = sync
 
     settings = __json_object_hook(__SETTINGS)
 

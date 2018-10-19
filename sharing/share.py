@@ -3,6 +3,7 @@ from networking import Peer, Message, Server, PeerManager
 from .sentence import Sentence, Info
 from .factory import SentenceFactory as Factory
 
+from utils import settings
 from utils.logger import default_logger as log
 
 
@@ -108,9 +109,10 @@ class ShareManager:
         for want_blocks in Factory.want_blocks_for_info(info):
             await self.send_question(want_blocks, peer)
 
-        want_peers = Factory.want_peers_for_info(info)
-        if want_peers is not None:
-            await self.send_question(want_peers, peer)
+        if settings.peers.sync:
+            want_peers = Factory.want_peers_for_info(info)
+            if want_peers is not None:
+                await self.send_question(want_peers, peer)
 
     @staticmethod
     async def send_question(question: Sentence, to: Peer, callback=None):

@@ -8,5 +8,8 @@
   "server": {
     "address": "auto",
     "port": 32767
+  },
+  "peers": {
+    "sync": false
   }
 }
