@@ -41,14 +41,24 @@ class Sentence:
                        Message.Type.ERROR if self.type == Sentence.Type.ERROR else Message.Type.ANSWER,
                        question.message.identifer)
 
+    @classmethod
+    def flat_dict(cls, value: dict, initial='', indent=0) -> str:
+        if not isinstance(value, dict):
+            return value
+
+        def max_width_cal(r, x):
+            return r if r > len(x) else len(x)
+
+        max_width = reduce(max_width_cal, value, 0)
+        result = initial
+        for k, v in value.items():
+            if isinstance(v, dict):
+                v = cls.flat_dict(v, '\n', 4)
+            result += f'{" " * indent}[{k}{" " * (max_width - len(k))}] {v}\n'
+        return result
+
     def __repr__(self):
-        max_width = reduce(lambda r, x: r if r > len(x) else len(x), self.dict.keys(), 0)
-        result = ''
-        for key, value in self.dict.items():
-            if isinstance(value, dict):
-                value = len(value.keys())
-            result += f'[{key}{" " * (max_width - len(key))}] {value}\n'
-        return (f'{self.message}\n' if self.message is not None else '') + result
+        return (f'{self.message}\n' if self.message is not None else '') + self.flat_dict(self.dict)
 
 
 @dataclass

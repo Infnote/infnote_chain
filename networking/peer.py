@@ -136,5 +136,8 @@ class PeerManager(metaclass=Singleton):
                 }
             }]
         )
-        arrange_rank = list(result)[0]['rank']
+        result = list(result)
+        if len(result) == 0:
+            return '<PeerManager: No Peers>'
+        arrange_rank = result[0]['rank']
         return "<PeerManager: %d peers, rank %.02f(avg.)>" % (self.count, arrange_rank)
