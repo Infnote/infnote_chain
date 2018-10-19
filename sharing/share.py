@@ -84,8 +84,10 @@ class ShareManager:
 
             wb = Factory.want_blocks_for_new_block(sentence)
             if wb is not None:
-                await self.send_question(wb, peer)
-            await self.broadcast(sentence, peer)
+                async def broadcast(msg, p):
+                    await self.handle(msg, p)
+                    await self.broadcast(sentence, peer)
+                await self.send_question(wb, peer, broadcast)
 
     async def broadcast(self, sentence, without=None):
         self.boardcast_cache[sentence.boardcast.identifer] = sentence
@@ -111,9 +113,9 @@ class ShareManager:
             await self.send_question(want_peers, peer)
 
     @staticmethod
-    async def send_question(question: Sentence, to: Peer):
-        log.debug(f'Reply to {to}:\n{question}')
-        await to.send(question.question)
+    async def send_question(question: Sentence, to: Peer, callback=None):
+        log.debug(f'Ask to {to}:\n{question}')
+        await to.send(question.question, callback)
 
     @staticmethod
     async def send_answer(answer: Sentence, question: Sentence, to: Peer):
