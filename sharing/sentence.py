@@ -289,7 +289,7 @@ class NewBlock(Sentence):
     def boardcast(self):
         if self.message is None:
             self.message = Message(self.dict, Message.Type.BROADCAST)
-        return self.message
+        return Message(self.dict, Message.Type.BROADCAST, self.message.identifer)
 
     def __repr__(self):
         return super().__repr__()

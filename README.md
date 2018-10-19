@@ -7,6 +7,7 @@
 - [ ] Refresh connections strategy
 - [ ] Peers updating strategy
 - [ ] Clean boardcast id periodically
+- [ ] Need some kind of authorization before boardcast
 - [ ] Ranking strategy
     - [ ] Bad chain detection
     - [ ] Bad peer detection
