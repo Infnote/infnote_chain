@@ -79,7 +79,7 @@ class Peer:
                 # log.debug(f'Received: {msg} from {self}')
                 await self.dispatcher.dispatch(msg, self)
             else:
-                log.warn(f'Bad message:\n{data}')
+                log.warning(f'Bad message:\n{data}')
                 self.rank -= 1
 
     def __repr__(self):

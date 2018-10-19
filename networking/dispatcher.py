@@ -24,4 +24,4 @@ class Dispatcher:
         elif self.global_handler is not None:
             await self.global_handler(message, peer)
         else:
-            log.warn('Missing gloabel handler for receiving messages.')
+            log.warning('Missing gloabel handler for receiving messages.')
