@@ -29,7 +29,7 @@ COLORS = {
 
 class ColoredFormatter(logging.Formatter):
     def __init__(self, msg, datefmt=None, use_color=True):
-        logging.Formatter.__init__(self, msg, datefmt)
+        super().__init__(msg, datefmt)
         self.use_color = use_color
 
     def format(self, record):
@@ -37,7 +37,7 @@ class ColoredFormatter(logging.Formatter):
         if self.use_color and levelname in COLORS:
             levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
             record.levelname = levelname_color
-        return logging.Formatter.format(self, record)
+        return super().format(record)
 
 
 # TODO: read setting to set log level
@@ -51,10 +51,10 @@ def get_logger(name):
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s')
-    colored_formatter = ColoredFormatter('[%(asctime)s][%(levelname)s] %(message)s', '%H:%M:%S')
-    file_handlder.setFormatter(formatter)
-    stream_handler.setFormatter(colored_formatter)
+    file_formatter = ColoredFormatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s')
+    stream_formatter = ColoredFormatter('[%(asctime)s][%(levelname)s] %(message)s', '%H:%M:%S')
+    file_handlder.setFormatter(file_formatter)
+    stream_handler.setFormatter(stream_formatter)
 
     logger.addHandler(file_handlder)
     logger.addHandler(stream_handler)
