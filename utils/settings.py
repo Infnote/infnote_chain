@@ -17,7 +17,8 @@ __SETTINGS = {
         'port': '8080',
     },
     'peers': {
-        'sync': True
+        'sync': True,
+        'retry': 5
     }
 }
 
@@ -56,6 +57,9 @@ with open(os.path.dirname(__file__) + '/../settings.json', 'r') as file:
         sync = peers.get('sync')
         if sync is not None:
             __SETTINGS['peers']['sync'] = sync
+        retry = peers.get('retry')
+        if retry is not None and isinstance(retry, int):
+            __SETTINGS['peers']['retry'] = retry
 
     settings = __json_object_hook(__SETTINGS)
 

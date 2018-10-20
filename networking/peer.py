@@ -22,6 +22,7 @@ class Peer:
     is_server: bool = True
     peer_in: Any = None
     peer_out: Any = None
+    retry_count: int = 0
 
     @property
     def dict(self):
@@ -29,6 +30,10 @@ class Peer:
             'address': self.address,
             'port': self.port
         }
+
+    @property
+    def is_connected(self) -> bool:
+        return self.socket is not None
 
     @classmethod
     def from_client(cls, socket):
@@ -39,6 +44,7 @@ class Peer:
         return peer
 
     def open(self):
+        log.info(f'Connecting (count: {self.retry_count + 1}) {self}')
         asyncio.set_event_loop(asyncio.new_event_loop())
         asyncio.get_event_loop().run_until_complete(self.catched())
 
@@ -50,6 +56,7 @@ class Peer:
         except websockets.ConnectionClosed:
             log.debug(f'Disconnected from {self}')
         finally:
+            self.socket = None
             if self.peer_out is not None:
                 await self.peer_out(self)
 
@@ -82,6 +89,9 @@ class Peer:
                 log.warning(f'Bad message:\n{data}')
                 self.rank -= 1
 
+    def save(self):
+        PeerManager().add_peer(self)
+
     def __repr__(self):
         return f'<Peer{"(server)" if self.is_server else "(client)"}: {self.address}:{self.port} (rank: {self.rank})>'
 
@@ -99,8 +109,8 @@ class PeerManager(metaclass=Singleton):
     def all_peers(self) -> [Peer]:
         return [Peer(peer['address'], peer['port'], peer['rank']) for peer in self.database.peers.find()]
 
-    def peers(self, count=10, without_self=False) -> [Peer]:
-        query = {}
+    def peers(self, count=10, without_self=False, min_rank=0) -> [Peer]:
+        query = {'rank': {'$gt': min_rank}}
         if without_self:
             query['address'] = {
                 '$nin': [settings.server.address, '0.0.0.0', 'localhost', '127.0.0.1']

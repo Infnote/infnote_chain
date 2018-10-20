@@ -18,8 +18,11 @@ class Server:
         log.info(f'Start server {settings.server.address}:{settings.server.port}')
         asyncio.set_event_loop(asyncio.new_event_loop())
         server = websockets.serve(self.handle, '0.0.0.0', settings.server.port)
-        asyncio.get_event_loop().run_until_complete(server)
-        asyncio.get_event_loop().run_forever()
+        try:
+            asyncio.get_event_loop().run_until_complete(server)
+            asyncio.get_event_loop().run_forever()
+        except OSError as error:
+            log.error(error)
 
     async def handle(self, socket, _):
         peer = Peer.from_client(socket)

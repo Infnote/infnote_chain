@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, Timer
 from networking import Peer, Message, Server, PeerManager
 from .sentence import Sentence, Info
 from .factory import SentenceFactory as Factory
@@ -28,6 +28,9 @@ class ShareManager:
         # TODO: need a connection strategy (when current connections is less then specific number)
         pass
 
+    def retry(self, peer, after):
+        pass
+
     async def peer_in(self, peer):
         log.info(f'Peer in : {peer}')
         peer.dispatcher.global_handler = self.handle
@@ -39,10 +42,16 @@ class ShareManager:
     async def peer_out(self, peer):
         log.info(f'Peer out: {peer}')
         if peer.is_server:
-            self.servers.remove(peer)
+            peer.rank -= 1
+            peer.retry_count += 1
+            peer.save()
+            if peer.retry_count >= settings.peers.retry:
+                self.servers.remove(peer)
+                self.refresh()
+            else:
+                Timer((peer.retry_count + 1) ** 4, peer.open).start()
         else:
             self.clients.remove(peer)
-        self.refresh()
 
     async def handle(self, message: Message, peer: Peer):
         sentence = Factory.load(message)

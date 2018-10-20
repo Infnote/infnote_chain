@@ -10,6 +10,7 @@
     "port": 32767
   },
   "peers": {
-    "sync": false
+    "sync": false,
+    "retry": 5
   }
 }
