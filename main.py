@@ -7,6 +7,7 @@ import logging
 from sharing import ShareManager, PeerManager, Peer
 from scripts.migrate import migrate
 from utils.logger import default_logger as log
+from utils import settings
 
 
 class Main:
@@ -21,6 +22,7 @@ class Main:
         server_group.add_argument('-f', '--fork', action='store_true',
                                   help='Start service in background fork process.')
         server_group.add_argument('-a', '--add', type=str, help='Add a peer to database.')
+        server_group.add_argument('-S', '--add_self', action='store_true', help='Save this host as a peer.')
 
         migrate_group = self.parser.add_argument_group('Migrate')
         migrate_group.add_argument('-m', '--migrate', action='store_true',
@@ -39,6 +41,8 @@ class Main:
             self.add_peer(parsed.add)
         elif parsed.stop:
             self.stop()
+        elif parsed.add_self:
+            self.add_peer(f'{settings.server.address}:{settings.server.port}')
 
     @staticmethod
     def migrate():
@@ -53,9 +57,9 @@ class Main:
                     if not isinstance(handler, logging.FileHandler):
                         log.removeHandler(handler)
 
-                ShareManager().start()
                 log.info(f'Running with PID {os.getpid()}')
                 log.info(PeerManager())
+                ShareManager().start()
                 with open('/tmp/infnote_chain.pid', 'w+') as file:
                     file.write(f'{os.getpid()}')
             else:
@@ -71,7 +75,7 @@ class Main:
             print('Wrong format of peer address. It should be like "127.0.0.1:8080".')
         peer = Peer(address=addr[0], port=int(addr[1]))
         PeerManager().add_peer(peer)
-        print(f'Peer saved: {peer}')
+        log.info(f'Peer saved: {peer}')
 
     @staticmethod
     def stop():

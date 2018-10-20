@@ -128,12 +128,6 @@ class PeerManager(metaclass=Singleton):
     def migrate(self):
         log.info('Create index for "address" in "peers".')
         self.database.peers.create_index([('address', ASCENDING)], unique=True)
-        log.info(f'Add this host as a peer to "peers" ({settings.server.address}:{settings.server.port}).')
-        self.database.peers.update_one(
-            {'address': settings.server.address},
-            {'$set': {'address': settings.server.address, 'port': settings.server.port, 'rank': 100}},
-            upsert=True
-        )
 
     def __repr__(self):
         result = self.database.peers.aggregate(
