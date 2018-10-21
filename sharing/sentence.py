@@ -2,9 +2,9 @@ from platform import uname
 from enum import Enum
 from dataclasses import dataclass, field
 from networking import Message
-from functools import reduce
 from networking import Peer, PeerManager
 from blockchain import Block, Blockchain
+from utils.reprutil import flat_dict_for_repr
 
 
 @dataclass
@@ -41,24 +41,8 @@ class Sentence:
                        Message.Type.ERROR if self.type == Sentence.Type.ERROR else Message.Type.ANSWER,
                        question.message.identifer)
 
-    @classmethod
-    def flat_dict(cls, value: dict, initial='', indent=0) -> str:
-        if not isinstance(value, dict):
-            return value
-
-        def max_width_cal(r, x):
-            return r if r > len(x) else len(x)
-
-        max_width = reduce(max_width_cal, value, 0)
-        result = initial
-        for k, v in value.items():
-            if isinstance(v, dict):
-                v = cls.flat_dict(v, '\n', 4)
-            result += f'{" " * indent}[{k}{" " * (max_width - len(k))}] {v}\n'
-        return result
-
     def __repr__(self):
-        return (f'{self.message}\n' if self.message is not None else '') + self.flat_dict(self.dict)
+        return (f'{self.message}\n' if self.message is not None else '') + flat_dict_for_repr(self.dict)
 
 
 @dataclass

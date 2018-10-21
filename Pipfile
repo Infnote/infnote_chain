@@ -8,10 +8,13 @@ pymongo = "*"
 "base58" = "*"
 ecdsa = "*"
 websockets = "*"
+grpcio = "*"
 
 [dev-packages]
 pylint = "*"
 pyinstaller = "*"
+grpcio-tools = "*"
+googleapis-common-protos = "*"
 
 [requires]
 python_version = "3.7"

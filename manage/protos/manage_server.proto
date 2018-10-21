@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package build;
+
+service Manage {
+    rpc run_command(Command) returns (stream Result);
+}
+
+message Command {
+    string name = 1;
+    map<string, string> args = 2;
+}
+
+message Result {
+    string line = 1;
+}

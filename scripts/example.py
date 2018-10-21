@@ -1,13 +1,13 @@
-import random
-import string
-import asyncio
-
-from pprint import PrettyPrinter
+# import random
+# import string
+# import asyncio
+#
+# from pprint import PrettyPrinter
 # from blockchain import *
 
-from sharing import *
-
-pprint = PrettyPrinter(indent=4).pprint
+# from sharing import *
+#
+# pprint = PrettyPrinter(indent=4).pprint
 
 # Call migrate when first run, it will create indexes for accelerating query speed
 # Database().migrate()
@@ -80,35 +80,10 @@ pprint = PrettyPrinter(indent=4).pprint
 #     print(block.data)
 
 
-manager = ShareManager()
-manager.start()
-
-chains = [chain for chain in Blockchain.all_chains() if chain.is_owner]
-chain = chains[0]
-
-log.info(PeerManager())
-
-
-def create_block():
-    pre = ''.join(random.choice(['Cool', 'Nice', 'Great', 'Yeah', 'Gorgeous']))
-    suf = ''.join(random.choice('😎🤔😆🎉👍'))
-    block = chain.create_block({
-        'title': 'New Article (' + ''.join(random.choices(string.hexdigits, k=6)) + ')',
-        'content': pre + ' ' + suf
-    })
-    chain.save_block(block)
-
-    asyncio.set_event_loop(asyncio.new_event_loop())
-    asyncio.get_event_loop().run_until_complete(boardcast())
-
-
-async def boardcast():
-    await manager.broadcast(SentenceFactory.new_block(chain))
-
-
-while True:
-    cmd = input()
-    if cmd == 'create':
-        create_block()
-    elif cmd == 'bc':
-        boardcast()
+# manager = ShareManager()
+# manager.start()
+#
+# chains = [chain for chain in Blockchain.all_chains() if chain.is_owner]
+# chain = chains[0]
+#
+# log.info(PeerManager())

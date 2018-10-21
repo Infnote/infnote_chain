@@ -8,6 +8,7 @@ from hashlib import sha256
 from base58 import b58encode
 from .key import Key
 from .storage import Database
+from utils.reprutil import flat_dict_for_repr
 
 
 @dataclass
@@ -78,12 +79,8 @@ class Block:
             b58encode(sha256(self.data_for_hashing).digest()).decode('utf8') == self.block_hash and \
             key.verify(self.signature, self.data_for_hashing)
 
-    def __str__(self):
-        return json.JSONEncoder(
-            sort_keys=True,
-            ensure_ascii=False,
-            indent=4
-        ).encode(self.dict)
+    def __repr__(self):
+        return flat_dict_for_repr({**self.dict, 'size': f'{len(self.data)} bytes'})
 
 
 class Blockchain:
