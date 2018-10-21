@@ -12,6 +12,8 @@ from .codegen.manage_server_pb2 import Result
 
 from scripts.generate import create_block
 
+from blockchain import Blockchain
+
 
 class Server(ManageServicer):
 
@@ -31,11 +33,27 @@ class Server(ManageServicer):
             yield Result(line=f'{peer}')
 
     def create_block(self, args):
+        # IMPORTANT: delete this line
+        chain = [chain for chain in Blockchain.all_chains() if chain.is_owner][0]
+
         size = self.parse_size(args.get('size', '0'))
         if size < 0:
             yield Result(line=f'"{args.get("size")}" is not a size.')
         else:
-            yield Result(line=f'Block created:\n{create_block(size)}')
+            yield Result(line=f'Block created:\n{create_block(chain, size)}')
+
+    def create_blocks(self, args):
+        # IMPORTANT: delete this line
+        chain = [chain for chain in Blockchain.all_chains() if chain.is_owner][0]
+
+        size = self.parse_size(args.get('size', '0'))
+        count = args.get('count', 0)
+        try:
+            count = int(count)
+        except ValueError:
+            yield Result(line=f'"{count}" is not a number.')
+        for i in range(count):
+            yield Result(line=f'Block created:\n{create_block(chain, size)}')
 
     @staticmethod
     def parse_size(size):

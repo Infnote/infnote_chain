@@ -1,6 +1,7 @@
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from utils import Singleton, settings
 from utils.logger import default_logger as log
+from datetime import datetime
 
 
 class Database(metaclass=Singleton):
@@ -12,11 +13,10 @@ class Database(metaclass=Singleton):
         self.database.chains.insert_one(chain)
 
     def save_block(self, block: dict):
-        log.debug(f'New valid block saving:\n'
-                  f'[chain_id] {block["chain_id"]}\n'
-                  f'[height  ] {block["height"]}\n'
-                  f'[hash    ] {block["hash"]}\n')
+        start = datetime.utcnow()
         self.database.blocks.insert_one(block)
+        end = datetime.utcnow()
+        log.info("New block saved in %.03f secs" % (end - start).total_seconds())
 
     def get_chain(self, public_key: str):
         return self.database.chains.find_one({'public_key': public_key})

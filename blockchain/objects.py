@@ -9,6 +9,7 @@ from base58 import b58encode
 from .key import Key
 from .storage import Database
 from utils.reprutil import flat_dict_for_repr
+from utils.logger import default_logger as log
 
 
 @dataclass
@@ -74,10 +75,17 @@ class Block:
 
     @property
     def is_valid(self) -> bool:
+        start = datetime.utcnow()
+
         key = Key(self.chain_id)
-        return (self.height == 0 or (self.prev_hash is not None and len(self.prev_hash) > 0)) and \
+        valid = (self.height == 0 or (self.prev_hash is not None and len(self.prev_hash) > 0)) and \
             b58encode(sha256(self.data_for_hashing).digest()).decode('utf8') == self.block_hash and \
             key.verify(self.signature, self.data_for_hashing)
+
+        end = datetime.utcnow()
+        log.info("Block validated in %.03f secs" % (end - start).total_seconds())
+
+        return valid
 
     def __repr__(self):
         return flat_dict_for_repr({**self.dict, 'size': f'{len(self.data)} bytes'})

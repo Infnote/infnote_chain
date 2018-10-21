@@ -2,7 +2,7 @@ import random
 import string
 import asyncio
 
-from blockchain import Blockchain
+# from blockchain import Blockchain
 from sharing import ShareManager, SentenceFactory
 
 
@@ -10,8 +10,8 @@ async def boardcast(chain):
     await ShareManager().broadcast(SentenceFactory.new_block(chain))
 
 
-def create_block(size=0):
-    chain = [chain for chain in Blockchain.all_chains() if chain.is_owner][0]
+def create_block(chain, size=0):
+    # chain = [chain for chain in Blockchain.all_chains() if chain.is_owner][0]
     # pre = ''.join(random.choice(['Cool', 'Nice', 'Great', 'Yeah', 'Gorgeous']))
     # suf = ''.join(random.choice('😎🤔😆🎉👍'))
     # block = chain.create_block({

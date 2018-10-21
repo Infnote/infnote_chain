@@ -13,11 +13,12 @@ from utils import settings
 from manage import ManageServer, ManageClient
 
 
+def args_filter(args, opts):
+    return {k: v for k, v in vars(args).items() if k in opts and v is not None}
+
+
 class Main:
     def __init__(self):
-        def args_filter(args):
-            return {k: v for k, v in vars(args).items() if k in arguments and v is not None}
-
         # Setting argument parse as git-like
         self.parser = argparse.ArgumentParser(description='Infnote Chain')
         self.subparsers = self.parser.add_subparsers(dest='command')
@@ -68,15 +69,25 @@ class Main:
         # {rpc} {create}
         self.rpc_create_commands = self.rpc_commands_subs\
             .add_parser('create', help='Create a chain or blocks with arguments.')
+        self.rpc_create_subs = self.rpc_create_commands.add_subparsers(dest='com_l3')
         # ---- ---- Level 3
         # {rpc} {create} {block}
-        self.rpc_create_subs = self.rpc_create_commands.add_subparsers(dest='com_l3')
-        arguments = ['size']
+        opts = ['size']
         sub = self.rpc_create_subs.add_parser('block', help='Create one block contains random content with size.')
         sub.add_argument('-s', '--size', type=str,
                          help='Block size with unit in integer, payload will be empty if give "0".'
                               ' (eg. "1", "1k", "1m", max "10m")')
-        sub.set_defaults(func=lambda args: ManageClient.run('create_block', args_filter(args)))
+        sub.set_defaults(func=lambda args: ManageClient.run('create_block', args_filter(args, opts)))
+        # ---- ---- Level 3
+        # {rpc} {create} {blocks}
+        opts = ['size', 'count']
+        sub = self.rpc_create_subs.add_parser('blocks', help='Create n blocks contains random content with size.')
+        sub.add_argument('-s', '--size', type=str,
+                         help='Block size with unit in integer, payload will be empty if give "0".'
+                              ' (eg. "1", "1k", "1m", max "10m")')
+        sub.add_argument('-n', '--count', type=str,
+                         help='How many blocks will be generated.')
+        sub.set_defaults(func=lambda args: ManageClient.run('create_blocks', args_filter(args, opts)))
 
     def run(self, args):
         args = self.parser.parse_args(args)
@@ -100,9 +111,9 @@ class Main:
                 log.info(f'Running with PID {os.getpid()}')
                 log.info(PeerManager())
                 ShareManager().start()
-                ManageServer.run()
                 with open('/tmp/infnote_chain.pid', 'w+') as file:
                     file.write(f'{os.getpid()}')
+                ManageServer.run()
             else:
                 log.info('Infnote Chain P2P Network Started in child process.')
         else:

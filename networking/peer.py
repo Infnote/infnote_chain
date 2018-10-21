@@ -74,6 +74,8 @@ class Peer:
             await self.recv()
 
     async def send(self, message: Message, callback=None):
+        if self.socket is None:
+            return
         if callback is not None:
             self.dispatcher.register(message.identifer, callback)
         # log.debug(f'Sending: {message} to {self}')
