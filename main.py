@@ -4,6 +4,7 @@ import os
 import signal
 import logging
 
+from collections import namedtuple
 from sharing import ShareManager, PeerManager, Peer
 from scripts.migrate import migrate
 from utils.logger import default_logger as log
@@ -13,44 +14,45 @@ from utils import settings
 class Main:
     def __init__(self):
         self.parser = argparse.ArgumentParser(description='Infnote Chain')
+        self.subparsers = self.parser.add_subparsers(dest='command')
 
-        server_group = self.parser.add_argument_group('Server')
-        server_group.add_argument('-s', '--start', action='store_true',
-                                  help='Start server and connect to P2P network.')
-        server_group.add_argument('-t', '--stop', action='store_true',
-                                  help='Stop background running server by PID in /tmp/infnote_chain.pid')
-        server_group.add_argument('-f', '--fork', action='store_true',
-                                  help='Start service in background fork process.')
-        server_group.add_argument('-a', '--add', type=str, help='Add a peer to database.')
-        server_group.add_argument('-S', '--add_self', action='store_true', help='Save this host as a peer.')
+        self.server_commands = self.subparsers.add_parser('server', help='Server relevant commands.')
+        self.server_commands.set_defaults(func=self.server)
+        self.server_subs = self.server_commands.add_subparsers(dest='subcommand')
+        sub = self.server_subs.add_parser('start', help='Start server.')
+        sub.set_defaults(func=self.start_server)
+        sub.add_argument('-f', '--fork', action='store_true', help='Start server in background.')
+        self.server_subs\
+            .add_parser('restart', help='Restart background server.')\
+            .set_defaults(func=self.restart_server)
+        self.server_subs\
+            .add_parser('stop', help='Stop server which is running in background.')\
+            .set_defaults(func=self.stop_server)
 
-        migrate_group = self.parser.add_argument_group('Migrate')
-        migrate_group.add_argument('-m', '--migrate', action='store_true',
-                                   help='Run migration for blockchain and peers storage.')
+        self.migrate_commands = self.subparsers.add_parser('migrate', help='Do migrations on MongoDB.')
+        self.migrate_commands.set_defaults(func=self.migrate)
+        self.migrate_subs = self.migrate_commands.add_subparsers(dest='subcommand')
+        sub = self.migrate_subs.add_parser('add', help='Add peer to database.')
+        sub.add_argument('address', type=str, help='Peer address (eg. 127.0.0.1:32767)')
+        sub.add_argument('-s', '--self', action='store_true', help='Add current host as a peer to database.')
+        sub.set_defaults(func=self.add_peer)
+
+        self.shell_commands = self.subparsers.add_parser('shell', help='Connect to background process.')
+        self.shell_commands.set_defaults(func=self.shell)
 
     def run(self, args):
-        if len(args) == 0:
+        args = self.parser.parse_args(args)
+        if args.command is None:
             self.parser.print_help()
-            return
-        parsed = self.parser.parse_args(args)
-        if parsed.migrate:
-            self.migrate()
-        elif parsed.start:
-            self.server(parsed.fork)
-        elif parsed.add:
-            self.add_peer(parsed.add)
-        elif parsed.stop:
-            self.stop()
-        elif parsed.add_self:
-            self.add_peer(f'{settings.server.address}:{settings.server.port}')
+        else:
+            args.func(args)
+
+    def server(self, _):
+        self.server_commands.print_help()
 
     @staticmethod
-    def migrate():
-        migrate()
-
-    @staticmethod
-    def server(fork):
-        if fork:
+    def start_server(args):
+        if args.fork:
             pid = os.fork()
             if pid == 0:
                 for handler in list(log.handlers):
@@ -65,20 +67,11 @@ class Main:
             else:
                 log.info('Infnote Chain P2P Network Started in child process.')
         else:
-            ShareManager().start()
             log.info(PeerManager())
+            ShareManager().start()
 
     @staticmethod
-    def add_peer(arg):
-        addr = arg.split(':')
-        if len(addr) < 2:
-            print('Wrong format of peer address. It should be like "127.0.0.1:8080".')
-        peer = Peer(address=addr[0], port=int(addr[1]))
-        PeerManager().add_peer(peer)
-        log.info(f'Peer saved: {peer}')
-
-    @staticmethod
-    def stop():
+    def stop_server(_=None):
         try:
             with open('/tmp/infnote_chain.pid', 'r') as file:
                 pid = int(file.readline())
@@ -88,6 +81,28 @@ class Main:
             log.warning('PID file is not exist. Process may not startup correctly.')
         except ProcessLookupError:
             log.warning(f'No such process PID {pid}.')
+
+    def restart_server(self, _):
+        self.stop_server()
+        self.start_server(namedtuple('args', ['fork'])(fork=True))
+
+    @staticmethod
+    def migrate(_):
+        migrate()
+
+    def add_peer(self, args):
+        if args.self:
+            peer = Peer(address=settings.server.address, port=settings.server.port)
+        elif args.address is not None:
+            addr = args.address.split(':')
+            if len(addr) < 2:
+                print('Wrong format of peer address. It should be like "127.0.0.1:32767".')
+            peer = Peer(address=addr[0], port=int(addr[1]))
+        else:
+            self.migrate_commands.print_help()
+            return
+        PeerManager().add_peer(peer)
+        log.info(f'Peer saved: {peer}')
 
 
 if __name__ == '__main__':

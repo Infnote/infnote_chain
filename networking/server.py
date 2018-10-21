@@ -25,6 +25,7 @@ class Server:
             log.error(error)
 
     async def handle(self, socket, _):
+        # TODO: Limit number of connections
         peer = Peer.from_client(socket)
         peer.peer_in = self.peer_in
         peer.peer_out = self.peer_out

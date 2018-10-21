@@ -293,3 +293,13 @@ class NewBlock(Sentence):
 
     def __repr__(self):
         return super().__repr__()
+
+
+# TODO: Broadcast or answer BadChain when received a valid block which height is already exist
+class BadChain(Sentence):
+    pass
+
+
+# TODO: Send a Busy to client when too many connections alive
+class Busy(Sentence):
+    pass

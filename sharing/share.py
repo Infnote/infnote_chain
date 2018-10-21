@@ -3,11 +3,11 @@ from networking import Peer, Message, Server, PeerManager
 from .sentence import Sentence, Info
 from .factory import SentenceFactory as Factory
 
-from utils import settings
+from utils import settings, Singleton
 from utils.logger import default_logger as log
 
 
-class ShareManager:
+class ShareManager(metaclass=Singleton):
     def __init__(self):
         self.servers = [peer for peer in PeerManager().peers(without_self=True) if peer.address]
         self.clients = []
@@ -40,8 +40,8 @@ class ShareManager:
             self.clients.append(peer)
 
     async def peer_out(self, peer):
-        log.info(f'Peer out: {peer}')
         if peer.is_server:
+            log.warning(f'Peer out: {peer}')
             peer.rank -= 1
             peer.retry_count += 1
             peer.save()
@@ -49,8 +49,11 @@ class ShareManager:
                 self.servers.remove(peer)
                 self.refresh()
             else:
-                Timer((peer.retry_count + 1) ** 4, peer.open).start()
+                secs = (peer.retry_count + 1) ** 4
+                log.warning(f'Retry after {secs} secs.')
+                Timer(secs, peer.open).start()
         else:
+            log.info(f'Peer out: {peer}')
             self.clients.remove(peer)
 
     async def handle(self, message: Message, peer: Peer):

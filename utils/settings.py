@@ -14,7 +14,11 @@ __SETTINGS = {
     'debug': True,
     'server': {
         'address': '0.0.0.0',
-        'port': '8080',
+        'port': 32767,
+    },
+    'socket': {
+        'address': '127.0.0.1',
+        'port': 32700
     },
     'peers': {
         'sync': True,
@@ -51,6 +55,15 @@ with open(os.path.dirname(__file__) + '/../settings.json', 'r') as file:
             address = get_host_ip()
         __SETTINGS['server']['address'] = address
         __SETTINGS['server']['port'] = server.get('port')
+
+    socket = user.get('socket')
+    if socket is not None and isinstance(socket, dict):
+        address = socket.get('address')
+        port = socket.get('port')
+        if not isinstance(port, int):
+            port = __SETTINGS['socket']['port']
+        __SETTINGS['socket']['address'] = address
+        __SETTINGS['socket']['port'] = port
 
     peers = user.get('peers')
     if peers is not None and isinstance(peers, dict):
