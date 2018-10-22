@@ -109,7 +109,7 @@ class ShareManager(metaclass=Singleton):
                 await self.send_question(wb, peer, handle_blocks)
 
     async def broadcast(self, sentence, without=None):
-        self.broadcast_cache[sentence.boardcast.identifer] = sentence
+        self.broadcast_cache[sentence.boardcast.identifier] = sentence
 
         log.debug(f'Broadcasting:\n{sentence}')
         for peer in self.servers + self.clients:
