@@ -11,7 +11,7 @@ class ShareManager(metaclass=Singleton):
     def __init__(self):
         self.servers = [peer for peer in PeerManager().peers(without_self=True) if peer.address]
         self.clients = []
-        self.boardcast_cache = {}
+        self.broadcast_cache = {}
 
     def start(self):
         for peer in self.servers:
@@ -94,9 +94,9 @@ class ShareManager(metaclass=Singleton):
             Factory.handle_peers(answer)
 
     async def handle_broadcast(self, sentence, peer):
-        last = self.boardcast_cache.get(sentence.message.identifer)
+        last = self.broadcast_cache.get(sentence.message.identifier)
         if sentence.type == Sentence.Type.NEW_BLOCK and last is None:
-            self.boardcast_cache[sentence.message.identifer] = sentence
+            self.broadcast_cache[sentence.message.identifier] = sentence
 
             wb = Factory.want_blocks_for_new_block(sentence)
             if wb is not None:
@@ -109,7 +109,7 @@ class ShareManager(metaclass=Singleton):
                 await self.send_question(wb, peer, handle_blocks)
 
     async def broadcast(self, sentence, without=None):
-        self.boardcast_cache[sentence.boardcast.identifer] = sentence
+        self.broadcast_cache[sentence.boardcast.identifer] = sentence
 
         log.debug(f'Broadcasting:\n{sentence}')
         for peer in self.servers + self.clients:
