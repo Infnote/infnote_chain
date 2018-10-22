@@ -76,6 +76,9 @@ class ShareManager(metaclass=Singleton):
             await self.info_actions(question, peer)
         elif question.type == Sentence.Type.WANT_BLOCKS:
             answer = Factory.send_blocks(question)
+            for block in answer:
+                await self.send_answer(block, question, peer)
+            return
         elif question.type == Sentence.Type.WANT_PEERS:
             answer = Factory.send_peers(question)
 
@@ -97,10 +100,13 @@ class ShareManager(metaclass=Singleton):
 
             wb = Factory.want_blocks_for_new_block(sentence)
             if wb is not None:
-                async def broadcast(msg, p):
+                async def handle_blocks(msg, p):
                     await self.handle(msg, p)
-                    await self.broadcast(sentence, peer)
-                await self.send_question(wb, peer, broadcast)
+                    sen = Factory.load(msg)
+                    if sen.type == Sentence.Type.BLOCKS and sen.end:
+                        await self.broadcast(sentence, peer)
+                        return True
+                await self.send_question(wb, peer, handle_blocks)
 
     async def broadcast(self, sentence, without=None):
         self.boardcast_cache[sentence.boardcast.identifer] = sentence

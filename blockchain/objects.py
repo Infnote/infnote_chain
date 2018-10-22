@@ -74,6 +74,10 @@ class Block:
         ).encode(self.dict).encode('utf8')
 
     @property
+    def size(self) -> int:
+        return len(self.data)
+
+    @property
     def is_valid(self) -> bool:
         start = datetime.utcnow()
 
@@ -176,8 +180,10 @@ class Blockchain:
         return None
 
     def create_block(self, payload: str) -> Block:
-        if isinstance(payload, dict):
+        if isinstance(payload, dict) or isinstance(payload, list):
             payload = json.JSONEncoder(separators=(',', ':'), ensure_ascii=False).encode(payload)
+        if len(payload) > 2**20:
+            raise ValueError('Block payload size should less than 1MB.')
         block = Block()
         block.payload = payload
         block.chain_id = self.id

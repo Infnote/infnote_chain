@@ -67,7 +67,7 @@ class Peer:
             await self.recv()
             return
         host = f'ws://{self.address}:{self.port}'
-        async with websockets.connect(host, max_size=2**30) as socket:
+        async with websockets.connect(host, max_size=2**21) as socket:
             self.socket = socket
             if self.peer_in is not None:
                 await self.peer_in(self)
@@ -77,7 +77,7 @@ class Peer:
         if self.socket is None:
             return
         if callback is not None:
-            self.dispatcher.register(message.identifer, callback)
+            self.dispatcher.register(message.identifier, callback)
         # log.debug(f'Sending: {message} to {self}')
         await self.socket.send(message.dump())
 

@@ -34,7 +34,7 @@ class Database(metaclass=Singleton):
 
     def get_blocks(self, chain_id: str, start: int, end: int):
         query = {'chain_id': chain_id, 'height': {'$gte': start, '$lte': end}}
-        return self.database.blocks.find(query)
+        return self.database.blocks.find(query).sort('height', ASCENDING)
 
     def get_height(self, chain_id):
         return self.database.blocks.count({'chain_id': chain_id})

@@ -29,12 +29,12 @@ def create_block(chain, size=0):
     start = datetime.utcnow()
     block = chain.create_block(payload)
     end = datetime.utcnow()
-    log.info("Create a block in %.03f secs" % (end - start).total_seconds())
+    log.info("Create a random content block in %.03f secs" % (end - start).total_seconds())
 
     start = datetime.utcnow()
     chain.save_block(block)
     end = datetime.utcnow()
-    log.info("Save a block in %.03f secs" % (end - start).total_seconds())
+    log.info("Validate & Save a random content block in %.03f secs" % (end - start).total_seconds())
 
     asyncio.set_event_loop(asyncio.new_event_loop())
     asyncio.get_event_loop().run_until_complete(boardcast(chain))

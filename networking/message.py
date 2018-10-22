@@ -16,14 +16,14 @@ class Message:
 
     content: dict = None
     type: Type = Type.QUESTION
-    identifer: str = field(default_factory=lambda: ''.join(choices(string.digits + string.ascii_letters, k=10)))
+    identifier: str = field(default_factory=lambda: ''.join(choices(string.digits + string.ascii_letters, k=10)))
 
     @classmethod
     def load(cls, json_string):
         try:
             json = JSONDecoder().decode(json_string)
             msg = Message()
-            msg.identifer = json['identifier']
+            msg.identifier = json['identifier']
             msg.type = cls.Type(json['type'])
             msg.content = json['content']
             return msg
@@ -32,11 +32,11 @@ class Message:
 
     def dump(self) -> str:
         json = {
-            'identifier': self.identifer,
+            'identifier': self.identifier,
             'type': self.type.value,
             'content': self.content
         }
         return JSONEncoder(ensure_ascii=False, separators=(',', ':')).encode(json)
 
     def __repr__(self):
-        return f'<Message: {self.identifer} - {self.type}>'
+        return f'<Message: {self.identifier} - {self.type}>'

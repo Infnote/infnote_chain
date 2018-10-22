@@ -39,7 +39,7 @@ class Sentence:
     def to(self, question):
         return Message(self.dict,
                        Message.Type.ERROR if self.type == Sentence.Type.ERROR else Message.Type.ANSWER,
-                       question.message.identifer)
+                       question.message.identifier)
 
     def __repr__(self):
         return (f'{self.message}\n' if self.message is not None else '') + flat_dict_for_repr(self.dict)
@@ -221,6 +221,7 @@ class Blocks(Sentence):
     type: Sentence.Type = Sentence.Type.BLOCKS
 
     blocks: list = field(default_factory=list)
+    end: bool = True
 
     @classmethod
     def load(cls, d):
@@ -228,6 +229,7 @@ class Blocks(Sentence):
         try:
             blocks.blocks = [Block(data) for data in d['blocks']]
             blocks.blocks.sort(key=lambda e: e.height)
+            blocks.end = d['end']
             return blocks
         except (KeyError, ValueError):
             return None
@@ -236,7 +238,8 @@ class Blocks(Sentence):
     def dict(self):
         return {
             **super().dict,
-            'blocks': [block.dict for block in self.blocks]
+            'blocks': [block.dict for block in self.blocks],
+            'end': self.end
         }
 
     def __repr__(self):
@@ -273,7 +276,7 @@ class NewBlock(Sentence):
     def boardcast(self):
         if self.message is None:
             self.message = Message(self.dict, Message.Type.BROADCAST)
-        return Message(self.dict, Message.Type.BROADCAST, self.message.identifer)
+        return Message(self.dict, Message.Type.BROADCAST, self.message.identifier)
 
     def __repr__(self):
         return super().__repr__()

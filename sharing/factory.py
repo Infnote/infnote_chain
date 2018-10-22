@@ -1,7 +1,6 @@
 from .sentence import *
 from typing import Optional
 from networking import PeerManager
-from utils.logger import default_logger as log
 
 
 class SentenceFactory:
@@ -71,7 +70,7 @@ class SentenceFactory:
         return None
 
     @staticmethod
-    def send_blocks(want_blocks: WantBlocks) -> Optional[Blocks]:
+    def send_blocks(want_blocks: WantBlocks):
         chain = Blockchain.load(want_blocks.chain_id)
         if chain is None:
             return None
@@ -80,8 +79,21 @@ class SentenceFactory:
         if blocks is None:
             return None
 
-        answer = Blocks()
-        answer.blocks = blocks
+        # make every sentence size as large as possible but less than 1.5MB
+        answer = []
+        size = 0
+        tmp = []
+        for block in blocks:
+            if block.size + size > 2**20 * 1.5:
+                answer.append(Blocks(blocks=list(tmp), end=False))
+                tmp = []
+                size = 0
+            else:
+                size += block.size
+                tmp.append(block)
+        if len(tmp) > 0:
+            answer.append(Blocks(blocks=list(tmp), end=True))
+        answer[-1].end = True
         return answer
 
     @staticmethod
