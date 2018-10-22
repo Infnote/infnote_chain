@@ -51,10 +51,10 @@ class Peer:
     async def catched(self):
         try:
             await self.__open()
-        except OSError:
-            log.debug(f'Failed to connect {self}')
-        except websockets.ConnectionClosed:
-            log.debug(f'Disconnected from {self}')
+        except OSError as error:
+            log.debug(f'Failed to connect {self}: {error}')
+        except websockets.ConnectionClosed as msg:
+            log.debug(f'Disconnected from {self}: {msg}')
         finally:
             self.socket = None
             if self.peer_out is not None:
@@ -67,7 +67,7 @@ class Peer:
             await self.recv()
             return
         host = f'ws://{self.address}:{self.port}'
-        async with websockets.connect(host) as socket:
+        async with websockets.connect(host, max_size=2**30) as socket:
             self.socket = socket
             if self.peer_in is not None:
                 await self.peer_in(self)

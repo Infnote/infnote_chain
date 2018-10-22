@@ -17,7 +17,7 @@ class Server:
     def start(self):
         log.info(f'Start server {settings.server.address}:{settings.server.port}')
         asyncio.set_event_loop(asyncio.new_event_loop())
-        server = websockets.serve(self.handle, '0.0.0.0', settings.server.port)
+        server = websockets.serve(self.handle, '0.0.0.0', settings.server.port, max_size=2**30)
         try:
             asyncio.get_event_loop().run_until_complete(server)
             asyncio.get_event_loop().run_forever()
