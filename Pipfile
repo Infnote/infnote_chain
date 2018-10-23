@@ -10,11 +10,11 @@ ecdsa = "*"
 websockets = "*"
 grpcio = "*"
 pyinstaller = "*"
+googleapis-common-protos = "*"
 
 [dev-packages]
 pylint = "*"
 grpcio-tools = "*"
-googleapis-common-protos = "*"
 
 [requires]
 python_version = "3.7"
