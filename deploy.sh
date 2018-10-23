@@ -15,6 +15,6 @@ pipenv install
 # generate executable file
 pipenv run pyinstaller ./main.spec -y
 # copy to global
-cp -f ./dist/main /usr/local/bin/ichain
+scp -p "${SSH_SECRET}" -f ./dist/main root@47.254.197.123:/usr/local/bin/ichain
 # start server
-ichain server restart
+ssh -p "${SSH_SECRET}" root@47.254.197.123 ichain server restart
