@@ -1,7 +1,23 @@
 language: python
-python:
-  - "3.7-dev"
+
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+
+before_install:
+  - touch ichain.pem
+  - openssl aes-256-cbc -K $encrypted_7626708397aa_key -iv $encrypted_7626708397aa_iv -in ichain.enc -out ichain.pem -d
+  - chmod 0600 ichain.pem
+
 install:
   - pip install pipenv
+  - pipenv install
+
 script:
+  - pyinstaller main.spec
+
+after_success:
+  - tar -czvf ichain.tgz ./dist/main
   - ./deploy.sh

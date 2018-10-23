@@ -67,3 +67,5 @@ Pipfile.lock
 # VS Code
 .vscode/
 
+# Misc
+*.pem

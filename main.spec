@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['src/main.py'],
-             pathex=['/Users/vergil/Documents/Repositories/infnote_chain'],
+             pathex=['./src/'],
              binaries=[],
              datas=[],
              hiddenimports=[
