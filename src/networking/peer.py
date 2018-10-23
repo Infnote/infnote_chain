@@ -94,6 +94,11 @@ class Peer:
     def save(self):
         PeerManager().add_peer(self)
 
+    def __eq__(self, other):
+        if isinstance(other, Peer) and self.address == other.address and self.port == other.port:
+            return True
+        return False
+
     def __repr__(self):
         return f'<Peer{"(server)" if self.is_server else "(client)"}: {self.address}:{self.port} (rank: {self.rank})>'
 

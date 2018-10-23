@@ -28,8 +28,14 @@ class ShareManager(metaclass=Singleton):
         # TODO: need a connection strategy (when current connections is less then specific number)
         pass
 
-    def retry(self, peer, after):
-        pass
+    def retry(self, peer):
+        if peer.retry_count >= settings.peers.retry:
+            self.servers.remove(peer)
+            self.refresh()
+        elif peer not in self.clients:
+            secs = (peer.retry_count + 1) ** 4
+            log.warning(f'Retry after {secs} secs.')
+            Timer(secs, peer.open).start()
 
     async def peer_in(self, peer):
         log.info(f'Peer in : {peer}')
@@ -45,13 +51,7 @@ class ShareManager(metaclass=Singleton):
             peer.rank -= 1
             peer.retry_count += 1
             peer.save()
-            if peer.retry_count >= settings.peers.retry:
-                self.servers.remove(peer)
-                self.refresh()
-            else:
-                secs = (peer.retry_count + 1) ** 4
-                log.warning(f'Retry after {secs} secs.')
-                Timer(secs, peer.open).start()
+            self.retry(peer)
         else:
             log.info(f'Peer out: {peer}')
             self.clients.remove(peer)

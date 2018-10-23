@@ -21,7 +21,7 @@ __SETTINGS = {
         'port': 32700
     },
     'peers': {
-        'sync': False,
+        'sync': True,
         'retry': 5
     }
 }
@@ -60,10 +60,10 @@ def __read_user_settings(path):
         if socket is not None and isinstance(socket, dict):
             address = socket.get('address')
             port = socket.get('port')
-            if not isinstance(port, int):
-                port = __SETTINGS['socket']['port']
-            __SETTINGS['socket']['address'] = address
-            __SETTINGS['socket']['port'] = port
+            if isinstance(address, str) and address != "auto":
+                __SETTINGS['socket']['address'] = address
+            if isinstance(port, int):
+                __SETTINGS['socket']['port'] = port
 
         peers = user.get('peers')
         if peers is not None and isinstance(peers, dict):
