@@ -9,10 +9,10 @@ pymongo = "*"
 ecdsa = "*"
 websockets = "*"
 grpcio = "*"
+pyinstaller = "*"
 
 [dev-packages]
 pylint = "*"
-pyinstaller = "*"
 grpcio-tools = "*"
 googleapis-common-protos = "*"
 
