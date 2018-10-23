@@ -9,7 +9,6 @@ from sharing import ShareManager, PeerManager, Peer
 from scripts.migrate import migrate
 from utils.logger import default_logger as log
 from utils import settings
-
 from manage import ManageServer, ManageClient
 
 

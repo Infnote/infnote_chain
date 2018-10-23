@@ -67,6 +67,3 @@ Pipfile.lock
 # VS Code
 .vscode/
 
-# Protobuf
-manage/codegen/*
-!manage/codegen/__init__.py
