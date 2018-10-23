@@ -86,7 +86,7 @@ class SentenceFactory:
         for block in blocks:
             if block.size + size > 2**20 * 1.5:
                 answer.append(Blocks(blocks=list(tmp), end=False))
-                tmp = []
+                tmp = [block]
                 size = 0
             else:
                 size += block.size
