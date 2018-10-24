@@ -9,10 +9,10 @@ from requests.exceptions import ConnectTimeout, ConnectionError as ConnectError
 def get_host_ip():
     try:
         ip = get('https://api.ipify.org', timeout=1).text
-        if subprocess.call(['ping', '-c 1', '-t 1', ip]) == 0:
+        if subprocess.call(['ping', '-c 1', ip], stdout=subprocess.DEVNULL, timeout=0.5) == 0:
             log.info(f'Public IP: {ip}')
             return ip
-    except (ConnectTimeout, ConnectError):
+    except (ConnectTimeout, ConnectError, subprocess.TimeoutExpired):
         log.error('Failed to get public IP.')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

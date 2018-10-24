@@ -45,15 +45,14 @@ def get_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
+    file_formatter = ColoredFormatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s')
     file_handlder = logging.FileHandler('/tmp/infnote_chain.log')
     file_handlder.setLevel(logging.DEBUG)
+    file_handlder.setFormatter(file_formatter)
 
+    stream_formatter = ColoredFormatter('[%(asctime)s,%(msecs)03d][%(levelname)s] %(message)s', '%H:%M:%S')
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.DEBUG)
-
-    file_formatter = ColoredFormatter('[%(asctime)s][%(name)s][%(levelname)s] %(message)s')
-    stream_formatter = ColoredFormatter('[%(asctime)s][%(levelname)s] %(message)s', '%H:%M:%S')
-    file_handlder.setFormatter(file_formatter)
     stream_handler.setFormatter(stream_formatter)
 
     logger.addHandler(file_handlder)

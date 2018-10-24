@@ -2,7 +2,6 @@ import argparse
 import sys
 import os
 import signal
-import logging
 
 from collections import namedtuple
 from sharing import ShareManager, PeerManager, Peer
@@ -136,7 +135,7 @@ class Main:
 
     def restart_server(self, _):
         self.stop_server()
-        self.start_server(namedtuple('args', ['fork'])(fork=True))
+        self.start_server(namedtuple('args', ['fore'])(fore=False))
 
     @staticmethod
     def migrate(_):
