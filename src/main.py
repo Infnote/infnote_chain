@@ -2,6 +2,7 @@ import argparse
 import sys
 import os
 import signal
+import logging
 
 from collections import namedtuple
 from sharing import ShareManager, PeerManager, Peer

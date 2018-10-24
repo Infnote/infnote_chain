@@ -113,7 +113,7 @@ class Settings:
 
         self.write_to_settings_file()
 
-        log.info(f'Config file at: {self.location}')
+        log.debug(f'Config file at: {self.location}')
 
         return self.__json_object_hook(self.__settings)
 
