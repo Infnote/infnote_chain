@@ -3,6 +3,7 @@ import os
 
 from collections import namedtuple
 from .getip import get_host_ip
+from .logger import default_logger as log
 
 
 __SETTINGS = {
@@ -27,6 +28,21 @@ __SETTINGS = {
 }
 
 settings = None
+settings_loc = None
+
+
+def write_to_settings_file():
+    __create_settings_file(settings_loc, dict(settings._asdict()))
+
+
+def __create_settings_file(path, value):
+    try:
+        os.makedirs(os.path.dirname(path))
+        with open(path, 'w+') as file:
+            content = json.JSONEncoder(indent=4).encode(value)
+            file.write(content)
+    except OSError as err:
+        log.error(f'{err}')
 
 
 def __json_object_hook(d):
@@ -81,6 +97,7 @@ if os.path.isfile(current_path):
     __read_user_settings(current_path)
 elif os.path.isfile(global_path):
     __read_user_settings(global_path)
+else:
+    __create_settings_file(global_path, __SETTINGS)
 
 settings = __json_object_hook(__SETTINGS)
-
