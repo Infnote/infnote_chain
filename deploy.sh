@@ -9,7 +9,7 @@ ichain server stop
 tar -xzf ichain.tgz
 rm ichain.tgz
 cp dist/main /usr/local/bin/ichain
-ichain server start -f
+ichain server start
 rm -r dist
 "
 done

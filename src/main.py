@@ -30,7 +30,7 @@ class Main:
         # {server} {start}
         sub = self.server_subs.add_parser('start', help='Start server.')
         sub.set_defaults(func=self.start_server)
-        sub.add_argument('-f', '--fork', action='store_true', help='Start server in background.')
+        sub.add_argument('-f', '--fore', action='store_true', help='Start server in foreground.')
         # ---- Level 2
         # {server} {restart}
         self.server_subs\
@@ -102,7 +102,7 @@ class Main:
 
     @staticmethod
     def start_server(args):
-        if args.fork:
+        if not args.fore:
             pid = os.fork()
             if pid == 0:
                 for handler in list(log.handlers):
