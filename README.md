@@ -1,4 +1,4 @@
-# Infnote Chain (python version) [![Build Status](https://travis-ci.org/Infnote/infnote_chain.svg?branch=master)](https://travis-ci.org/Infnote/infnote_chain)
+# Infnote Chain [![Build Status](https://travis-ci.org/Infnote/infnote_chain.svg?branch=master)](https://travis-ci.org/Infnote/infnote_chain) ![Python Version](https://img.shields.io/badge/python-3.7-green.svg)
 
 ### TODO:
 
