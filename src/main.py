@@ -2,13 +2,11 @@ import argparse
 import sys
 import os
 import signal
-import logging
 
 from collections import namedtuple
 from sharing import ShareManager, PeerManager, Peer
 from scripts.migrate import migrate
-from utils.logger import default_logger as log
-from utils import settings
+from utils import settings, log
 from manage import ManageServer, ManageClient
 
 
@@ -31,7 +29,7 @@ class Main:
         # {server} {start}
         sub = self.server_subs.add_parser('start', help='Start server.')
         sub.set_defaults(func=self.start_server)
-        sub.add_argument('-f', '--fork', action='store_true', help='Start server in background.')
+        sub.add_argument('-f', '--fore', action='store_true', help='Start server in foreground.')
         # ---- Level 2
         # {server} {restart}
         self.server_subs\
@@ -103,7 +101,7 @@ class Main:
 
     @staticmethod
     def start_server(args):
-        if args.fork:
+        if not args.fore:
             pid = os.fork()
             if pid == 0:
                 for handler in list(log.handlers):
@@ -137,7 +135,7 @@ class Main:
 
     def restart_server(self, _):
         self.stop_server()
-        self.start_server(namedtuple('args', ['fork'])(fork=True))
+        self.start_server(namedtuple('args', ['fore'])(fore=False))
 
     @staticmethod
     def migrate(_):

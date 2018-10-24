@@ -16,6 +16,7 @@ from scripts.generate import create_block
 
 from blockchain import Blockchain
 from utils.reprutil import flat_dict_for_repr
+from utils import settings
 
 
 class Server(ManageServicer):
@@ -101,7 +102,7 @@ class Server(ManageServicer):
     def run(cls):
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         add_ManageServicer_to_server(cls(), server)
-        server.add_insecure_port('0.0.0.0:32700')
+        server.add_insecure_port(f'{settings.manage.address}:{settings.manage.port}')
         server.start()
         try:
             asyncio.get_event_loop().run_forever()

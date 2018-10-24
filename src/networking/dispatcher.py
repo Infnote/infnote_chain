@@ -2,7 +2,7 @@ from .message import Message
 from typing import Any
 from dataclasses import dataclass, field
 
-from utils.logger import default_logger as log
+from utils import log
 
 
 @dataclass
