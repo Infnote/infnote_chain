@@ -5,8 +5,7 @@ from typing import Any
 from dataclasses import dataclass
 from .peer import Peer
 
-from utils import settings
-from utils.logger import default_logger as log
+from utils import settings, log
 
 
 @dataclass

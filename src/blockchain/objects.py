@@ -9,7 +9,7 @@ from base58 import b58encode
 from .key import Key
 from .storage import Database
 from utils.reprutil import flat_dict_for_repr
-from utils.logger import default_logger as log
+from utils import log
 
 
 @dataclass

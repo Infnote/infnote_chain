@@ -3,7 +3,7 @@ import os
 
 from collections import namedtuple
 from .getip import get_host_ip
-from .logger import default_logger as log
+from . import log
 
 
 __SETTINGS = {

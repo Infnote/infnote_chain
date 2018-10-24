@@ -5,7 +5,7 @@ import asyncio
 from datetime import datetime
 # from blockchain import Blockchain
 from sharing import ShareManager, SentenceFactory
-from utils.logger import default_logger as log
+from utils import log
 
 
 async def boardcast(chain):

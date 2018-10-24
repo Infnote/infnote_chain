@@ -3,8 +3,7 @@ from networking import Peer, Message, Server, PeerManager
 from .sentence import Sentence, Info
 from .factory import SentenceFactory as Factory
 
-from utils import settings, Singleton
-from utils.logger import default_logger as log
+from utils import settings, Singleton, log
 
 
 class ShareManager(metaclass=Singleton):

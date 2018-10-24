@@ -9,7 +9,7 @@ from typing import Any
 from utils import Singleton, settings
 from pymongo import MongoClient, ASCENDING, DESCENDING
 
-from utils.logger import default_logger as log
+from utils import log
 
 
 @dataclass

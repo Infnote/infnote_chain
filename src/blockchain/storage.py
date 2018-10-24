@@ -1,6 +1,5 @@
 from pymongo import MongoClient, ASCENDING, DESCENDING
-from utils import Singleton, settings
-from utils.logger import default_logger as log
+from utils import Singleton, settings, log
 from datetime import datetime
 
 
