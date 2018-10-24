@@ -1,7 +1,20 @@
 import socket
+import subprocess
+
+from .logger import default_logger as log
+from requests import get
+from requests.exceptions import ConnectTimeout, ConnectionError as ConnectError
 
 
 def get_host_ip():
+    try:
+        ip = get('https://api.ipify.org', timeout=1).text
+        if subprocess.call(['ping', '-c 1', '-t 1', ip]) == 0:
+            log.info(f'Public IP: {ip}')
+            return ip
+    except (ConnectTimeout, ConnectError):
+        log.error('Failed to get public IP.')
+
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # doesn't even have to be reachable
@@ -12,4 +25,5 @@ def get_host_ip():
     finally:
         s.close()
 
+    log.info(f'Local IP: {ip}')
     return ip
