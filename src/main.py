@@ -12,8 +12,8 @@ from utils import settings
 from manage import ManageServer, ManageClient
 
 
-def args_filter(args, opts):
-    return {k: v for k, v in vars(args).items() if k in opts and v is not None}
+def args_filter(args, options):
+    return {k: v for k, v in vars(args).items() if k in options and v is not None}
 
 
 class Main:
@@ -70,23 +70,26 @@ class Main:
             .add_parser('create', help='Create a chain or blocks with arguments.')
         self.rpc_create_subs = self.rpc_create_commands.add_subparsers(dest='com_l3')
         # ---- ---- Level 3
+        # {rpc} {create} {chain}
+        sub = self.rpc_create_subs.add_parser('chain', help='Create a chain with description.')
+        sub.add_argument('desc', type=str, help='Description of new chain.')
+        sub.set_defaults(func=lambda args: ManageClient.run('create_chain', args_filter(args, ['desc'])))
+        # ---- ---- Level 3
         # {rpc} {create} {block}
-        opts = ['size']
         sub = self.rpc_create_subs.add_parser('block', help='Create one block contains random content with size.')
         sub.add_argument('-s', '--size', type=str,
                          help='Block size with unit in integer, payload will be empty if give "0".'
                               ' (eg. "1", "1k", "1m", max "10m")')
-        sub.set_defaults(func=lambda args: ManageClient.run('create_block', args_filter(args, opts)))
+        sub.set_defaults(func=lambda args: ManageClient.run('create_block', args_filter(args, ['size'])))
         # ---- ---- Level 3
         # {rpc} {create} {blocks}
-        opts = ['size', 'count']
         sub = self.rpc_create_subs.add_parser('blocks', help='Create n blocks contains random content with size.')
         sub.add_argument('-s', '--size', type=str,
                          help='Block size with unit in integer, payload will be empty if give "0".'
                               ' (eg. "1", "1k", "1m", max "10m")')
         sub.add_argument('-n', '--count', type=str,
                          help='How many blocks will be generated.')
-        sub.set_defaults(func=lambda args: ManageClient.run('create_blocks', args_filter(args, opts)))
+        sub.set_defaults(func=lambda args: ManageClient.run('create_blocks', args_filter(args, ['size', 'count'])))
 
     def run(self, args):
         args = self.parser.parse_args(args)

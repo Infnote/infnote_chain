@@ -18,6 +18,10 @@ def flat_dict_for_repr(value: dict, initial='', indent=0) -> str:
             for item in v:
                 tmp += flat_dict_for_repr(item, '\n', indent + 4)
             v = tmp
+        elif isinstance(v, bytes):
+            v = v.decode('utf8')
+            if len(v) > 150:
+                v = v[:150]
         elif isinstance(v, str):
             if len(v) > 150:
                 v = v[:150]

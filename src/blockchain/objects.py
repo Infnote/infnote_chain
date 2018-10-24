@@ -142,7 +142,7 @@ class Blockchain:
             separators=(',', ':'),
             sort_keys=True,
             ensure_ascii=False
-        ).encode(kwargs).encode('utf8'))
+        ).encode(kwargs))
         chain.save()
         chain.save_block(block)
         return chain
@@ -150,12 +150,17 @@ class Blockchain:
     def __init__(self, key: Key):
         self.key = key
         self.database = Database()
+        self.__info = None
 
-        genesis = self.get_block(0)
-        if genesis is not None:
-            self.info = json.JSONDecoder().decode(genesis.payload)
+    @property
+    def info(self):
+        if self.__info is not None:
+            return self.__info
         else:
-            self.info = None
+            genesis = self.get_block(0)
+            if genesis is not None:
+                self.__info = json.JSONDecoder().decode(genesis.payload)
+            return self.__info
 
     @property
     def id(self):

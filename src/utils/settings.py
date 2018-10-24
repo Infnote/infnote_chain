@@ -21,7 +21,7 @@ __SETTINGS = {
         'port': 32700
     },
     'peers': {
-        'sync': True,
+        'sync': False,
         'retry': 5
     }
 }
