@@ -1,4 +1,6 @@
 import logging
+import sys
+import os
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -57,6 +59,10 @@ def get_logger(name):
 
     logger.addHandler(file_handlder)
     logger.addHandler(stream_handler)
+
+    # Temporarily solved redundant log problem caused by 'import grpc'
+    # Crash info will also pipe to the file below
+    sys.stderr = open('/tmp/infnote_chain.err', 'w+')
 
     return logger
 
