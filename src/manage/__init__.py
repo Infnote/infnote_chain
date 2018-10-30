@@ -1,2 +1,2 @@
-from .server import Server as ManageServer
-from .client import Client as ManageClient
+from .server import run_rpc_server
+from .client import ManageClient

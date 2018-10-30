@@ -2,6 +2,7 @@
 
 ### TODO:
 
+- [ ] Check if peer connection is still alive by send a info 
 - [ ] Respond 'Error' when cannot respond correctly
 - [ ] Blocks request strategy
 - [ ] Refresh connections strategy

@@ -14,3 +14,22 @@ message Command {
 message Result {
     string line = 1;
 }
+
+service Blockchain {
+    rpc create_block(Payload) returns (Block);
+}
+
+message Payload {
+    string content = 1;
+    string chain_id = 2;
+}
+
+message Block {
+    string chain_id     = 1;
+    string block_hash   = 2;
+    string prev_hash    = 3;
+    string signature    = 4;
+    int32 time          = 5;
+    int32 height        = 6;
+}
+

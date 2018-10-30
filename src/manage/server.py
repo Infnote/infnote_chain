@@ -1,25 +1,26 @@
 import grpc
 import asyncio
-import os
-import signal
 import string
 import getpass
+import random
 
-from datetime import datetime
+from calendar import timegm
+from threading import Thread
 from concurrent import futures
-from sharing import ShareManager
 
-from .codegen.manage_server_pb2_grpc import ManageServicer, add_ManageServicer_to_server
-from .codegen.manage_server_pb2 import Result
+from .codegen.manage_server_pb2_grpc import ManageServicer, BlockchainServicer, \
+    add_ManageServicer_to_server, add_BlockchainServicer_to_server
+from .codegen.manage_server_pb2 import Result, Block
 
 from scripts.generate import create_block
 
 from blockchain import Blockchain
+from sharing import ShareManager
 from utils.reprutil import flat_dict_for_repr
 from utils import settings
 
 
-class Server(ManageServicer):
+class ManageServer(ManageServicer):
 
     def run_command(self, request, context):
         if request.name is not None:
@@ -39,12 +40,12 @@ class Server(ManageServicer):
     @staticmethod
     def create_chain(args):
         chain = Blockchain.create(
-            name=f'Test Chain (by python @ {datetime.now().strftime("%Y-%m-%d %H:%M:%S")})',
+            name=args.get('name', f'Chain-{"".join(random.choices(string.ascii_letters + string.digits, k=6))}'),
             version='0.1',
-            author=getpass.getuser(),
-            website='infnote.com',
-            email='vergil@infnote.com',
-            desc=args.get('desc')
+            author=args.get('author', getpass.getuser()),
+            website=args.get('website', 'infnote.com'),
+            email=args.get('email', 'vergil@infnote.com'),
+            desc=args.get('desc', '')
         )
         yield Result(line=flat_dict_for_repr(chain.info))
 
@@ -98,13 +99,36 @@ class Server(ManageServicer):
             return -1
         return number
 
-    @classmethod
-    def run(cls):
+
+class BlockchainServer(BlockchainServicer):
+
+    def create_block(self, request, context):
+        if request.chain_id is not None and len(request.chain_id) > 0:
+            chain = Blockchain.load(request.chain_id)
+            if chain is not None:
+                try:
+                    block = create_block(chain, request.content)
+                    if block is not None:
+                        return Block(
+                            chain_id=block.chain_id,
+                            block_hash=block.block_hash,
+                            prev_hash=block.prev_hash,
+                            signature=block.signature,
+                            time=timegm(block.time.timetuple()),
+                            height=block.height
+                        )
+                except ValueError:
+                    pass
+        return Block()
+
+
+def run_rpc_server():
+    def __run():
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        add_ManageServicer_to_server(cls(), server)
+        add_ManageServicer_to_server(ManageServer(), server)
+        add_BlockchainServicer_to_server(BlockchainServer(), server)
         server.add_insecure_port(f'{settings.manage.address}:{settings.manage.port}')
         server.start()
-        try:
-            asyncio.get_event_loop().run_forever()
-        except KeyboardInterrupt:
-            os.kill(os.getpid(), signal.SIGTERM)
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        asyncio.get_event_loop().run_forever()
+    Thread(target=__run).start()
