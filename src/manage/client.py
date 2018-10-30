@@ -3,7 +3,7 @@ import grpc
 from .codegen import manage_server_pb2, manage_server_pb2_grpc
 
 
-class Client:
+class ManageClient:
     @staticmethod
     def run(name, args=None):
         if args is None:

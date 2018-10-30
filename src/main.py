@@ -8,7 +8,7 @@ from collections import namedtuple
 from sharing import ShareManager, PeerManager, Peer
 from scripts.migrate import migrate
 from utils import settings, log
-from manage import ManageServer, ManageClient
+from manage import ManageClient, run_rpc_server
 
 
 def args_filter(args, options):
@@ -71,24 +71,28 @@ class Main:
         # ---- ---- Level 3
         # {rpc} {create} {chain}
         sub = self.rpc_create_subs.add_parser('chain', help='Create a chain with description.')
-        sub.add_argument('desc', type=str, help='Description of new chain.')
-        sub.set_defaults(func=lambda args: ManageClient.run('create_chain', args_filter(args, ['desc'])))
-        # ---- ---- Level 3
-        # {rpc} {create} {block}
-        sub = self.rpc_create_subs.add_parser('block', help='Create one block contains random content with size.')
-        sub.add_argument('-s', '--size', type=str,
-                         help='Block size with unit in integer, payload will be empty if give "0".'
-                              ' (eg. "1", "1k", "1m", max "10m")')
-        sub.set_defaults(func=lambda args: ManageClient.run('create_block', args_filter(args, ['size'])))
-        # ---- ---- Level 3
-        # {rpc} {create} {blocks}
-        sub = self.rpc_create_subs.add_parser('blocks', help='Create n blocks contains random content with size.')
-        sub.add_argument('-s', '--size', type=str,
-                         help='Block size with unit in integer, payload will be empty if give "0".'
-                              ' (eg. "1", "1k", "1m", max "10m")')
-        sub.add_argument('-n', '--count', type=str,
-                         help='How many blocks will be generated.')
-        sub.set_defaults(func=lambda args: ManageClient.run('create_blocks', args_filter(args, ['size', 'count'])))
+        sub.add_argument('-n', '--name', type=str, help='Name of new chain.')
+        sub.add_argument('-a', '--author', type=str, help='Author of new chain.')
+        sub.add_argument('-w', '--website', type=str, help='Website of new chain.')
+        sub.add_argument('-e', '--email', type=str, help='Contact email of new chain.')
+        sub.add_argument('-d', '--desc', type=str, help='Description of new chain.')
+        sub.set_defaults(func=self.create_chain)
+        # # ---- ---- Level 3
+        # # {rpc} {create} {block}
+        # sub = self.rpc_create_subs.add_parser('block', help='Create one block contains random content with size.')
+        # sub.add_argument('-s', '--size', type=str,
+        #                  help='Block size with unit in integer, payload will be empty if give "0".'
+        #                       ' (eg. "1", "1k", "1m", max "10m")')
+        # sub.set_defaults(func=lambda args: ManageClient.run('create_block', args_filter(args, ['size'])))
+        # # ---- ---- Level 3
+        # # {rpc} {create} {blocks}
+        # sub = self.rpc_create_subs.add_parser('blocks', help='Create n blocks contains random content with size.')
+        # sub.add_argument('-s', '--size', type=str,
+        #                  help='Block size with unit in integer, payload will be empty if give "0".'
+        #                       ' (eg. "1", "1k", "1m", max "10m")')
+        # sub.add_argument('-n', '--count', type=str,
+        #                  help='How many blocks will be generated.')
+        # sub.set_defaults(func=lambda args: ManageClient.run('create_blocks', args_filter(args, ['size', 'count'])))
 
     def run(self, args):
         args = self.parser.parse_args(args)
@@ -114,13 +118,13 @@ class Main:
                 ShareManager().start()
                 with open('/tmp/infnote_chain.pid', 'w+') as file:
                     file.write(f'{os.getpid()}')
-                ManageServer.run()
+                run_rpc_server()
             else:
                 log.info('Infnote Chain P2P Network Started in child process.')
         else:
             log.info(PeerManager())
             ShareManager().start()
-            ManageServer.run()
+            run_rpc_server()
 
     @staticmethod
     def stop_server(_=None):
@@ -155,6 +159,10 @@ class Main:
             return
         PeerManager().add_peer(peer)
         log.info(f'Peer saved: {peer}')
+
+    @staticmethod
+    def create_chain(args):
+        ManageClient.run('create_chain', args_filter(args, ['name', 'desc', 'author', 'website', 'email']))
 
 
 if __name__ == '__main__':

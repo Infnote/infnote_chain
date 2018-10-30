@@ -46,6 +46,14 @@ class Key:
             return b58encode(self.__private_key.to_string()).decode('ascii')
         return None
 
+    @property
+    def raw_public_key(self) -> bytes:
+        return b'\x04' + self.__public_key.to_string()
+
+    @property
+    def raw_private_key(self) -> Optional[bytes]:
+        return self.__private_key.to_string()
+
     def sign(self, data: bytes):
         if self.can_sign:
             return self.__private_key.sign(

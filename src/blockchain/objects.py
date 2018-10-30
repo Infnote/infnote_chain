@@ -160,7 +160,7 @@ class Blockchain:
             genesis = self.get_block(0)
             if genesis is not None:
                 self.__info = json.JSONDecoder().decode(genesis.payload)
-            return self.__info
+            return {**self.__info, 'chain_id': self.id}
 
     @property
     def id(self):
