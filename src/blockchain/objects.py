@@ -1,6 +1,6 @@
 import json
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from calendar import timegm
 from typing import Optional
 from datetime import datetime
@@ -14,15 +14,16 @@ from utils import log
 
 @dataclass
 class Block:
+    time: datetime
     block_hash: str = ''
     prev_hash: str = ''
-    time: datetime = datetime.utcnow()
     signature: str = ''
     chain_id: str = ''
     height: int = 0
     payload: str = ''
 
     def __init__(self, data: dict = None):
+        self.time = datetime.utcnow()
         if data is not None:
             self.block_hash = data.get('hash')
             self.prev_hash = data.get('prev_hash')
