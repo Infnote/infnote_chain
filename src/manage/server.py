@@ -116,7 +116,7 @@ class BlockchainServer(BlockchainServicer):
                             block_hash=block.block_hash,
                             prev_hash=block.prev_hash,
                             signature=block.signature,
-                            time=timegm(block.time.timetuple()),
+                            time=block.time,
                             height=block.height
                         )
                 except ValueError:

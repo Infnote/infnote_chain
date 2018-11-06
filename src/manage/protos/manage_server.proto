@@ -29,7 +29,7 @@ message Block {
     string block_hash   = 2;
     string prev_hash    = 3;
     string signature    = 4;
-    int32 time          = 5;
-    int32 height        = 6;
+    int64 time          = 5;
+    int64 height        = 6;
 }
 
