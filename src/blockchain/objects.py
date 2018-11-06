@@ -177,7 +177,7 @@ class Blockchain:
         else:
             genesis = self.get_block(0)
             if genesis is not None:
-                self.__info = json.JSONDecoder().decode(genesis.payload)
+                self.__info = json.JSONDecoder().decode(genesis.payload.decode('utf8'))
             return {**self.__info, 'chain_id': self.id}
 
     @property

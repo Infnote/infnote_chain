@@ -57,6 +57,7 @@ class ManageServer(ManageServicer):
         chain = chains[0]
         # IMPORTANT: delete these lines ↑↑↑
 
+        # TODO: outdate
         size = self.parse_size(args.get('size', '0'))
         if size < 0:
             yield Result(line=f'"{args.get("size")}" is not a size.')
@@ -71,6 +72,7 @@ class ManageServer(ManageServicer):
         chain = chains[0]
         # IMPORTANT: delete these lines ↑↑↑
 
+        # TODO: outdate
         size = self.parse_size(args.get('size', '0'))
         count = args.get('count', 0)
         try:
