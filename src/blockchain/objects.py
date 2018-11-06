@@ -24,7 +24,7 @@ class Block:
     payload: bytes = b''
 
     def __init__(self, data: dict = None):
-        self.time = datetime.utcnow()
+        self.time = timegm(datetime.utcnow().utctimetuple())
         if data is not None:
             self.block_hash = data.get('hash')
             self.prev_hash = data.get('prev_hash')
@@ -36,30 +36,27 @@ class Block:
 
     @classmethod
     def from_bytes(cls, data: bytes):
-        obj = BlockData.ParseFromString(data)
-        return cls(
-            time=obj.time,
-            block_hash=obj.hash,
-            prev_hash=obj.prev_hash,
-            signature=obj.signature,
-            chain_id=obj.chain_id,
-            height=obj.height,
-            payload=obj.payload
-        )
+        obj = BlockData()
+        obj.ParseFromString(data)
+        block = Block()
+        block.time = obj.time,
+        block.block_hash = obj.hash,
+        block.prev_hash = obj.prev_hash,
+        block.signature = obj.signature,
+        block.chain_id = obj.chain_id,
+        block.height = obj.height,
+        block.payload = obj.payload
+        return block
 
     @property
     def is_genesis(self):
         return self.height == 0
 
     @property
-    def utctime(self) -> int:
-        return timegm(self.time.utctimetuple())
-
-    @property
     def dict(self) -> dict:
         data = {
             'hash': self.block_hash,
-            'time': int(self.utctime),
+            'time': self.time,
             'signature': self.signature,
             'chain_id': self.chain_id,
             'height': self.height,
@@ -82,7 +79,7 @@ class Block:
     @property
     def data(self) -> bytes:
         return BlockData(
-            time=int(self.utctime),
+            time=self.time,
             chain_id=self.chain_id,
             height=self.height,
             payload=self.payload,
