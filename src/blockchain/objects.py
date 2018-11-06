@@ -13,6 +13,7 @@ from utils import log
 
 from .codegen.objects_pb2 import BlockData
 
+
 @dataclass
 class Block:
     time: datetime
@@ -38,15 +39,15 @@ class Block:
     def from_bytes(cls, data: bytes):
         obj = BlockData()
         obj.ParseFromString(data)
-        block = Block()
-        block.time = obj.time,
-        block.block_hash = obj.hash,
-        block.prev_hash = obj.prev_hash,
-        block.signature = obj.signature,
-        block.chain_id = obj.chain_id,
-        block.height = obj.height,
-        block.payload = obj.payload
-        return block
+        return Block({
+            'time': obj.time,
+            'hash': obj.hash,
+            'prev_hash': obj.prev_hash,
+            'signature': obj.signature,
+            'chain_id': obj.chain_id,
+            'height': obj.height,
+            'payload': obj.payload
+        })
 
     @property
     def is_genesis(self):
