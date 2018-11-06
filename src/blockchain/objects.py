@@ -1,6 +1,6 @@
 import json
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from calendar import timegm
 from typing import Optional
 from datetime import datetime
@@ -11,6 +11,7 @@ from .storage import Database
 from utils.reprutil import flat_dict_for_repr
 from utils import log
 
+from .codegen.objects_pb2 import BlockData
 
 @dataclass
 class Block:
@@ -20,7 +21,7 @@ class Block:
     signature: str = ''
     chain_id: str = ''
     height: int = 0
-    payload: str = ''
+    payload: bytes = b''
 
     def __init__(self, data: dict = None):
         self.time = datetime.utcnow()
@@ -32,6 +33,19 @@ class Block:
             self.chain_id = data.get('chain_id')
             self.height = data.get('height')
             self.payload = data.get('payload')
+
+    @classmethod
+    def from_bytes(cls, data: bytes):
+        obj = BlockData.ParseFromString(data)
+        return cls(
+            time=obj.time,
+            block_hash=obj.hash,
+            prev_hash=obj.prev_hash,
+            signature=obj.signature,
+            chain_id=obj.chain_id,
+            height=obj.height,
+            payload=obj.payload
+        )
 
     @property
     def is_genesis(self):
@@ -57,22 +71,25 @@ class Block:
 
     @property
     def data_for_hashing(self) -> bytes:
-        data = self.dict
-        del data['hash']
-        del data['signature']
-        return json.JSONEncoder(
-            separators=(',', ':'),
-            sort_keys=True,
-            ensure_ascii=False
-        ).encode(data).encode('utf8')
+        return BlockData(
+            time=int(self.utctime),
+            chain_id=self.chain_id,
+            height=self.height,
+            payload=self.payload,
+            prev_hash=self.prev_hash
+        ).SerializeToString()
 
     @property
     def data(self) -> bytes:
-        return json.JSONEncoder(
-            separators=(',', ':'),
-            sort_keys=True,
-            ensure_ascii=False
-        ).encode(self.dict).encode('utf8')
+        return BlockData(
+            time=int(self.utctime),
+            chain_id=self.chain_id,
+            height=self.height,
+            payload=self.payload,
+            prev_hash=self.prev_hash,
+            hash=self.block_hash,
+            signature=self.signature
+        ).SerializeToString()
 
     @property
     def size(self) -> int:
@@ -84,7 +101,7 @@ class Block:
 
         key = Key(self.chain_id)
         valid = (self.height == 0 or (self.prev_hash is not None and len(self.prev_hash) > 0)) and \
-            b58encode(sha256(self.data_for_hashing).digest()).decode('utf8') == self.block_hash and \
+            b58encode(sha256(self.data_for_hashing).digest()).decode('ascii') == self.block_hash and \
             key.verify(self.signature, self.data_for_hashing)
 
         end = datetime.utcnow()
@@ -185,9 +202,11 @@ class Blockchain:
             return [Block(info) for info in blocks]
         return None
 
-    def create_block(self, payload: str) -> Block:
+    def create_block(self, payload: bytes) -> Block:
         if isinstance(payload, dict) or isinstance(payload, list):
-            payload = json.JSONEncoder(separators=(',', ':'), ensure_ascii=False).encode(payload)
+            payload = json.JSONEncoder(separators=(',', ':'), ensure_ascii=False).encode(payload).encode('utf8')
+        if isinstance(payload, str):
+            payload = payload.encode('utf8')
         if len(payload) > 2**20:
             raise ValueError('Block payload size should less than 1MB.')
         block = Block()

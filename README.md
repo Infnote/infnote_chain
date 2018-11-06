@@ -2,6 +2,7 @@
 
 ### TODO:
 
+- [ ] Change data structure to more robust one both saving and transmission instead of JSON
 - [ ] Check if peer connection is still alive by send a info 
 - [ ] Respond 'Error' when cannot respond correctly
 - [ ] Blocks request strategy

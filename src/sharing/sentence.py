@@ -5,6 +5,7 @@ from networking import Message
 from networking import Peer, PeerManager
 from blockchain import Block, Blockchain
 from utils.reprutil import flat_dict_for_repr
+from base58 import b58decode, b58encode
 
 
 @dataclass
@@ -227,7 +228,7 @@ class Blocks(Sentence):
     def load(cls, d):
         blocks = cls()
         try:
-            blocks.blocks = [Block(data) for data in d['blocks']]
+            blocks.blocks = [Block.from_bytes(b58decode(data)) for data in d['blocks']]
             blocks.blocks.sort(key=lambda e: e.height)
             blocks.end = d['end']
             return blocks
@@ -238,7 +239,7 @@ class Blocks(Sentence):
     def dict(self):
         return {
             **super().dict,
-            'blocks': [block.dict for block in self.blocks],
+            'blocks': [b58encode(block.data).decode('ascii') for block in self.blocks],
             'end': self.end
         }
 

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+message BlockData {
+    uint64 height       = 1;
+    uint64 time         = 2;
+    string chain_id     = 3;
+    string hash         = 4;
+    string prev_hash    = 5;
+    string signature    = 6;
+    bytes  payload      = 7;
+}
+
