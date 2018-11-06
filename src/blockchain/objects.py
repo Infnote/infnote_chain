@@ -28,7 +28,7 @@ class Block:
         if data is not None:
             self.block_hash = data.get('hash')
             self.prev_hash = data.get('prev_hash')
-            self.time = datetime.utcfromtimestamp(data.get('time'))
+            self.time = data.get('time')
             self.signature = data.get('signature')
             self.chain_id = data.get('chain_id')
             self.height = data.get('height')
@@ -69,7 +69,7 @@ class Block:
     @property
     def data_for_hashing(self) -> bytes:
         return BlockData(
-            time=int(self.utctime),
+            time=self.time,
             chain_id=self.chain_id,
             height=self.height,
             payload=self.payload,
