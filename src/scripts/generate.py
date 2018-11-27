@@ -28,16 +28,19 @@ def create_block(chain, payload):
     # end = datetime.utcnow()
     # log.info("Generate %d bytes random payload in %.03f secs" % (size, (end - start).total_seconds()))
 
+    if not chain.is_owner:
+        return None
+
     start = datetime.utcnow()
     block = chain.create_block(payload)
     end = datetime.utcnow()
-    log.info("Create a random content block in %.03f secs" % (end - start).total_seconds())
+    log.info("Create a block in %.03f secs" % (end - start).total_seconds())
 
     start = datetime.utcnow()
     if not chain.save_block(block):
         return None
     end = datetime.utcnow()
-    log.info("Validate & Save a random content block in %.03f secs" % (end - start).total_seconds())
+    log.info("Validate & Save the block in %.03f secs" % (end - start).total_seconds())
 
     def __b():
         asyncio.set_event_loop(asyncio.new_event_loop())

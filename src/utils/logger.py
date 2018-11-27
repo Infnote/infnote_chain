@@ -62,7 +62,7 @@ def get_logger(name):
 
     # Temporarily solved redundant log problem caused by 'import grpc'
     # Crash info will also pipe to the file below
-    sys.stderr = open('/tmp/infnote_chain.err', 'w+')
+    # sys.stderr = open('/tmp/infnote_chain.err', 'w+')
 
     return logger
 

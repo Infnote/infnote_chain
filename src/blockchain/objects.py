@@ -65,6 +65,8 @@ class Block:
         }
         if self.prev_hash is not None and len(self.prev_hash) > 0:
             data['prev_hash'] = self.prev_hash
+        else:
+            data['prev_hash'] = None
         return data
 
     @property

@@ -1,5 +1,7 @@
+from json import JSONDecoder
 from threading import Thread, Timer
 from networking import Peer, Message, Server, PeerManager
+from blockchain import Key, Blockchain
 from .sentence import Sentence, Info
 from .factory import SentenceFactory as Factory
 
@@ -39,6 +41,7 @@ class ShareManager(metaclass=Singleton):
     async def peer_in(self, peer):
         log.info(f'Peer in : {peer}')
         peer.dispatcher.global_handler = self.handle
+        peer.retry_count = 0
         if peer.is_server:
             await peer.send(Info().question)
         else:
@@ -59,6 +62,7 @@ class ShareManager(metaclass=Singleton):
         sentence = Factory.load(message)
         if sentence is None:
             log.warning(f'Bad sentence:\n{message.content}')
+            return
 
         log.debug(f'{peer} said:\n{sentence}')
         if message.type == Message.Type.QUESTION:
@@ -95,7 +99,7 @@ class ShareManager(metaclass=Singleton):
     async def handle_broadcast(self, sentence, peer):
         last = self.broadcast_cache.get(sentence.message.identifier)
         if sentence.type == Sentence.Type.NEW_BLOCK and last is None:
-            self.broadcast_cache[sentence.message.identifier] = sentence
+            self.broadcast_cache[sentence.message.identifier] = True
 
             wb = Factory.want_blocks_for_new_block(sentence)
             if wb is not None:
@@ -106,6 +110,17 @@ class ShareManager(metaclass=Singleton):
                         await self.broadcast(sentence, peer)
                         return True
                 await self.send_question(wb, peer, handle_blocks)
+        elif sentence.type == Sentence.Type.TRANSACTION and last is None:
+            self.broadcast_cache[sentence.message.identifier] = True
+
+            chain = Blockchain.load(sentence.chain_id)
+            if chain.is_owner:
+                # TODO: there should be some sort of validations or restrictions for payload
+                block = chain.create_block(sentence.payload)
+                chain.save_block(block)
+                await self.broadcast(Factory.new_block(chain))
+            else:
+                await self.broadcast(sentence, peer)
 
     async def broadcast(self, sentence, without=None):
         self.broadcast_cache[sentence.boardcast.identifier] = sentence

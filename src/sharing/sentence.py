@@ -19,6 +19,7 @@ class Sentence:
         WANT_BLOCKS = 'want_blocks'
         BLOCKS = 'blocks'
         NEW_BLOCK = 'new_block'
+        TRANSACTION = 'transaction'
 
     message: Message = None
     type: Type = Type.EMPTY
@@ -291,3 +292,40 @@ class BadChain(Sentence):
 # TODO: Send a Busy to client when too many connections alive
 class Busy(Sentence):
     pass
+
+
+@dataclass
+class Transaction(Sentence):
+    type: Sentence.Type = Sentence.Type.TRANSACTION
+    chain_id: str = ''
+    # Base58 encoded
+    payload: str = ''
+    public_key: bytes = b''
+    signature: str = ''
+
+    @classmethod
+    def load(cls, d):
+        transaction = cls()
+        try:
+            transaction.chain_id = d['chain_id']
+            transaction.payload = b58decode(d['payload'])
+            return transaction
+        except (KeyError, ValueError):
+            return None
+
+    @property
+    def dict(self):
+        return {
+            **super().dict,
+            'chain_id': self.chain_id,
+            'payload': b58encode(self.payload).decode('ascii')
+        }
+
+    @property
+    def boardcast(self):
+        if self.message is None:
+            self.message = Message(self.dict, Message.Type.BROADCAST)
+        return Message(self.dict, Message.Type.BROADCAST, self.message.identifier)
+
+    def __repr__(self):
+        return super().__repr__()

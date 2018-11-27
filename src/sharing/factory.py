@@ -1,6 +1,9 @@
+import requests
+
 from .sentence import *
 from typing import Optional
 from networking import PeerManager
+from utils.settings import settings
 
 
 class SentenceFactory:
@@ -13,20 +16,22 @@ class SentenceFactory:
             return None
 
         result = None
-        if t == 'info':
+        if t == Sentence.Type.INFO.value:
             result = Info.load(d)
-        elif t == 'error':
+        elif t == Sentence.Type.ERROR.value:
             result = Error.load(d)
-        elif t == 'want_peers':
+        elif t == Sentence.Type.WANT_PEERS.value:
             result = WantPeers.load(d)
-        elif t == 'peers':
+        elif t == Sentence.Type.PEERS.value:
             result = Peers.load(d)
-        elif t == 'want_blocks':
+        elif t == Sentence.Type.WANT_BLOCKS.value:
             result = WantBlocks.load(d)
-        elif t == 'blocks':
+        elif t == Sentence.Type.BLOCKS.value:
             result = Blocks.load(d)
-        elif t == 'new_block':
+        elif t == Sentence.Type.NEW_BLOCK.value:
             result = NewBlock.load(d)
+        elif t == Sentence.Type.TRANSACTION.value:
+            result = Transaction.load(d)
 
         if result is not None:
             result.message = message
@@ -132,3 +137,15 @@ class SentenceFactory:
         # TODO: need to mark bad chain (when there is two blocks which have same height)
         for block in blocks.blocks:
             Blockchain.remote_chain(block.chain_id).save_block(block)
+
+        try:
+            requests.get(settings.hooks.new_block)
+        except Exception:
+            pass
+
+    @staticmethod
+    def transaction(payload):
+        transaction = Transaction()
+        transaction.chain_id = payload.chain_id
+        transaction.payload = payload.content
+        return transaction

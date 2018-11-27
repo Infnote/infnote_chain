@@ -4,7 +4,6 @@ import string
 import getpass
 import random
 
-from calendar import timegm
 from threading import Thread
 from concurrent import futures
 
@@ -15,7 +14,7 @@ from .codegen.manage_server_pb2 import Result, Block
 from scripts.generate import create_block
 
 from blockchain import Blockchain
-from sharing import ShareManager
+from sharing import ShareManager, Factory
 from utils.reprutil import flat_dict_for_repr
 from utils import settings
 
@@ -107,7 +106,7 @@ class BlockchainServer(BlockchainServicer):
     def create_block(self, request, context):
         if request.chain_id is not None and len(request.chain_id) > 0:
             chain = Blockchain.load(request.chain_id)
-            if chain is not None:
+            if chain is not None and chain.is_owner:
                 try:
                     block = create_block(chain, request.content)
                     if block is not None:
@@ -121,6 +120,16 @@ class BlockchainServer(BlockchainServicer):
                         )
                 except ValueError:
                     pass
+            else:
+                def __broadcast():
+                    async def broadcast():
+                        await ShareManager().broadcast(Factory.transaction(request))
+
+                    asyncio.set_event_loop(asyncio.new_event_loop())
+                    asyncio.get_event_loop().run_until_complete(broadcast())
+
+                Thread(target=__broadcast()).run()
+                return Block(chain_id='defered')
         return Block()
 
 

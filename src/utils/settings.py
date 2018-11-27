@@ -25,6 +25,9 @@ class Settings:
         'peers': {
             'sync': False,
             'retry': 5
+        },
+        'hooks': {
+            'new_block': 'http://localhost/hooks/new_block/'
         }
     }
 
@@ -93,6 +96,12 @@ class Settings:
                 retry = peers.get('retry')
                 if retry is not None and isinstance(retry, int):
                     self.__settings['peers']['retry'] = retry
+
+            hooks = user.get('hooks')
+            if hooks is not None and isinstance(hooks, dict):
+                new_block = hooks.get('new_block')
+                if new_block is not None:
+                    self.__settings['hooks']['new_block'] = new_block
 
             self.location = path
 
