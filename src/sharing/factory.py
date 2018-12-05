@@ -1,9 +1,6 @@
-import requests
-
 from .sentence import *
 from typing import Optional
 from networking import PeerManager
-from utils.settings import settings
 
 
 class SentenceFactory:
@@ -138,10 +135,6 @@ class SentenceFactory:
         for block in blocks.blocks:
             Blockchain.remote_chain(block.chain_id).save_block(block)
 
-        try:
-            requests.get(settings.hooks.new_block)
-        except Exception:
-            pass
 
     @staticmethod
     def transaction(payload):

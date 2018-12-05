@@ -1,3 +1,4 @@
+import requests
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from utils import Singleton, settings, log
 from datetime import datetime
@@ -16,6 +17,10 @@ class Database(metaclass=Singleton):
         self.database.blocks.insert_one(block)
         end = datetime.utcnow()
         log.info("New block saved in %.03f secs" % (end - start).total_seconds())
+        try:
+            requests.get(settings.hooks.new_block)
+        except Exception:
+            pass
 
     def get_chain(self, public_key: str):
         return self.database.chains.find_one({'public_key': public_key})
